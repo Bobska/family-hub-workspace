@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamilyHub Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: var(--primary-gradient);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        
+        .dashboard-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .app-card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .app-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .app-card .card-header {
+            border: none;
+            padding: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .app-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .app-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .stats-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-app {
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-app:hover {
+            transform: scale(1.05);
+        }
+        
+        .welcome-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-home me-2"></i>FamilyHub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin">
+                            <i class="fas fa-cog me-1"></i> Admin
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/logout">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/login">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <h1 class="display-4">Welcome to FamilyHub</h1>
+            <p class="lead">Your complete family management platform</p>
+            {% if user.is_authenticated %}
+            <p class="mb-0">👋 Hello, {{ user.username }}! Today is {{ today|date:"l, F j, Y" }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mb-5">
+        <!-- Quick Stats (if authenticated) -->
+        {% if user.is_authenticated %}
+        <div class="welcome-section">
+            <h4 class="mb-3">Quick Overview</h4>
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Hours This Week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$0</div>
+                    <div class="stat-label">Budget Remaining</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Pending Payments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Active Projects</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- App Cards Grid -->
+        <div class="row g-4">
+            <!-- Timesheet Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card">
+                    <div class="card-header bg-primary">
+                        <span class="app-icon">⏰</span>
+                        <h5 class="mb-0">Timesheet</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Track your work hours and projects efficiently</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i> 0 hours this week<br>
+                                <i class="fas fa-project-diagram me-1"></i> 0 active projects
+                            </small>
+                        </div>
+                        <a href="/timesheet/" class="btn btn-primary btn-app w-100">
+                            Open Timesheet
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card">
+                    <div class="card-header bg-success">
+                        <span class="app-icon">💰</span>
+                        <h5 class="mb-0">Household Budget</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Manage family finances and track expenses</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-dollar-sign me-1"></i> $0 budget set<br>
+                                <i class="fas fa-chart-line me-1"></i> $0 spent this month
+                            </small>
+                        </div>
+                        <a href="/budget/" class="btn btn-success btn-app w-100">
+                            Manage Budget
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daycare Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card">
+                    <div class="card-header bg-info">
+                        <span class="app-icon">🧒</span>
+                        <h5 class="mb-0">Daycare Invoices</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Track daycare bills and payment history</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-file-invoice me-1"></i> 0 pending invoices<br>
+                                <i class="fas fa-money-check me-1"></i> $0 total due
+                            </small>
+                        </div>
+                        <a href="/daycare/" class="btn btn-info btn-app w-100 text-white">
+                            View Invoices
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card">
+                    <div class="card-header bg-warning">
+                        <span class="app-icon">💼</span>
+                        <h5 class="mb-0">Employment History</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Your career journey and work records</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-briefcase me-1"></i> 0 positions<br>
+                                <i class="fas fa-calendar me-1"></i> 0 years experience
+                            </small>
+                        </div>
+                        <a href="/employment/" class="btn btn-warning btn-app w-100">
+                            View History
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card">
+                    <div class="card-header bg-danger">
+                        <span class="app-icon">📅</span>
+                        <h5 class="mb-0">Upcoming Payments</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Never miss a payment deadline again</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-exclamation-circle me-1"></i> 0 due this week<br>
+                                <i class="fas fa-list me-1"></i> 0 total scheduled
+                            </small>
+                        </div>
+                        <a href="/payments/" class="btn btn-danger btn-app w-100">
+                            View Payments
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credit Cards Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card">
+                    <div class="card-header bg-secondary">
+                        <span class="app-icon">💳</span>
+                        <h5 class="mb-0">Credit Cards</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Manage credit cards and track limits</p>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-credit-card me-1"></i> 0 cards<br>
+                                <i class="fas fa-chart-pie me-1"></i> $0 available credit
+                            </small>
+                        </div>
+                        <a href="/creditcards/" class="btn btn-secondary btn-app w-100">
+                            Manage Cards
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
