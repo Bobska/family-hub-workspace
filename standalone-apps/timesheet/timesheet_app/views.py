@@ -43,7 +43,10 @@ def dashboard(request):
                 messages.success(request, 'Time entry added successfully!')
                 return redirect('timesheet:dashboard')
             except ValidationError as e:
-                messages.error(request, f'Error: {e}')
+                error_msg = ', '.join(e.messages) if hasattr(e, 'messages') else str(e)
+                messages.error(request, f'Validation error: {error_msg}')
+            except Exception as e:
+                messages.error(request, 'An unexpected error occurred. Please try again.')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -52,7 +55,7 @@ def dashboard(request):
     context = {
         'today': today,
         'current_datetime': now,
-        'formatted_date': now.strftime('%-d %B, %Y'),  # "29 August, 2025"
+        'formatted_date': now.strftime('%d %B, %Y').lstrip('0'),  # "29 August, 2025" (Windows compatible)
         'formatted_time': now.strftime('%I:%M %p'),  # 12-hour format with AM/PM
         'day_name': now.strftime('%A'),
         'today_entries': today_entries,
@@ -97,9 +100,12 @@ def daily_entry(request):
                 messages.success(request, 'Time entry added successfully!')
                 return redirect(f'{reverse("timesheet:daily_entry")}?date={selected_date}')
             except ValidationError as e:
-                messages.error(request, f'Error: {e}')
+                error_msg = ', '.join(e.messages) if hasattr(e, 'messages') else str(e)
+                messages.error(request, f'Validation error: {error_msg}')
+            except Exception as e:
+                messages.error(request, 'An unexpected error occurred. Please try again.')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, 'Please correct the form errors below.')
     else:
         # Pre-fill form with selected date
         form = TimeEntryForm(user=request.user, initial={'date': selected_date})

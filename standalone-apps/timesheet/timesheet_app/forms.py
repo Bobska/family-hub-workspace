@@ -35,7 +35,7 @@ class JobForm(forms.ModelForm):
         
         if not name and not address:
             raise forms.ValidationError(
-                'Please provide either a job name or address (or both)'
+                'Please provide either a job name or address (or both).'
             )
         
         return cleaned_data
@@ -101,7 +101,7 @@ class TimeEntryForm(forms.ModelForm):
         """Validate that the date is not in the future."""
         entry_date = self.cleaned_data.get('date')
         if entry_date and entry_date > date.today():
-            raise ValidationError("Cannot add entries for future dates")
+            raise ValidationError("Cannot add entries for future dates.")
         return entry_date
 
     def clean(self):
@@ -162,5 +162,5 @@ class DateFilterForm(forms.Form):
         """Validate that the selected date is not in the future."""
         selected_date = self.cleaned_data['date']
         if selected_date > date.today():
-            raise ValidationError("Cannot select future dates")
+            raise ValidationError("Cannot select future dates.")
         return selected_date
