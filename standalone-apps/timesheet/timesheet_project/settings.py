@@ -103,13 +103,25 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-nz'
 
-TIME_ZONE = 'UTC'
+# Timezone settings for Auckland, New Zealand
+TIME_ZONE = 'Pacific/Auckland'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
+
+# Date/Time formats for New Zealand
+DATE_FORMAT = 'd/m/Y'
+TIME_FORMAT = 'g:i A'
+DATETIME_FORMAT = 'd/m/Y g:i A'
+SHORT_DATE_FORMAT = 'd/m/Y'
+SHORT_DATETIME_FORMAT = 'd/m/Y g:i A'
+
+# Input formats for forms
+DATE_INPUT_FORMATS = ['%d/%m/%Y', '%Y-%m-%d', '%d-%m-%Y']
+TIME_INPUT_FORMATS = ['%H:%M', '%I:%M %p', '%H:%M:%S']
 
 
 # Static files (CSS, JavaScript, Images)
@@ -123,5 +135,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication settings
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'

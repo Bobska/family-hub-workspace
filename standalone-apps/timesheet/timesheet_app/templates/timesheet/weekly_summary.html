@@ -1,6 +1,28 @@
 {% extends 'timesheet/base.html' %}
 
-{% block title %}Weekly Summary - Timesheet{% endblock %}
+{% block extra_css %}
+<style>
+    .day-card {
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+    .day-card .card-body {
+        flex-grow: 1;
+        overflow-y: auto;
+        max-height: 150px;
+    }
+    /* Highlight weekends */
+    .weekend-card {
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+    }
+    .weekday-card {
+        background-color: #ffffff;
+        border: 2px solid #0d6efd;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -33,7 +55,7 @@
         <div class="week-nav">
             <div class="row align-items-center">
                 <div class="col-md-3">
-                    <a href="{% url 'timesheet:weekly_summary' %}?week_start={{ prev_week|date:'Y-m-d' }}" 
+                    <a href="{% url 'timesheet:weekly_summary' %}?year={{ prev_year }}&week={{ prev_week }}" 
                        class="btn btn-outline-primary">
                         <i class="fas fa-chevron-left me-1"></i>Previous Week
                     </a>
@@ -42,13 +64,24 @@
                     <h5 class="mb-0">
                         {{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}
                     </h5>
-                    <small class="text-muted">Total: {{ weekly_total|floatformat:2 }} hours</small>
+                    <small class="text-muted">
+                        Week {{ current_week }}, {{ current_year }} | 
+                        Total: {{ weekly_total|floatformat:2 }} hours |
+                        Days worked: {{ days_worked }} | 
+                        Entries: {{ total_entries }}
+                    </small>
                 </div>
                 <div class="col-md-3 text-end">
-                    <a href="{% url 'timesheet:weekly_summary' %}?week_start={{ next_week|date:'Y-m-d' }}" 
-                       class="btn btn-outline-primary">
-                        Next Week<i class="fas fa-chevron-right ms-1"></i>
-                    </a>
+                    {% if show_next %}
+                        <a href="{% url 'timesheet:weekly_summary' %}?year={{ next_year }}&week={{ next_week }}" 
+                           class="btn btn-outline-primary">
+                            Next Week<i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary" disabled>
+                            Next Week<i class="fas fa-chevron-right ms-1"></i>
+                        </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -114,20 +147,20 @@
 <!-- Daily Breakdown -->
 <div class="row">
     {% for day in week_data %}
-        <div class="col-lg-6 col-xl-4 mb-4">
-            <div class="card day-column">
-                <div class="day-header {% if day.is_today %}today{% endif %}">
+        <div class="col">
+            <div class="card day-card {% if day.weekday >= 5 %}weekend-card{% else %}weekday-card{% endif %}">
+                <div class="card-header {% if day.weekday >= 5 %}bg-secondary text-white{% else %}bg-primary text-white{% endif %}">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>
                             <strong>{{ day.day_name }}</strong>
-                            <br><small>{{ day.date|date:"M d" }}</small>
+                            <br><small>{{ day.date|date:"d/m" }}</small>
                         </span>
-                        <span class="badge {% if day.is_today %}bg-light text-dark{% else %}bg-secondary{% endif %}">
+                        <span class="badge bg-light text-dark">
                             {{ day.total|floatformat:2 }}h
                         </span>
                     </div>
                 </div>
-                <div class="day-content">
+                <div class="card-body">
                     {% if day.entries %}
                         {% for entry in day.entries %}
                             <div class="entry-item">

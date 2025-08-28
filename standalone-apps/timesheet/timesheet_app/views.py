@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta, date
 from decimal import Decimal
+import pytz
 from .models import Job, TimeEntry
 from .forms import JobForm, TimeEntryForm, QuickTimeEntryForm, DateFilterForm
 
@@ -15,7 +16,10 @@ from .forms import JobForm, TimeEntryForm, QuickTimeEntryForm, DateFilterForm
 @login_required
 def dashboard(request):
     """Dashboard view showing today's overview with quick entry form."""
-    today = timezone.now().date()
+    # Set timezone to Auckland
+    auckland_tz = pytz.timezone('Pacific/Auckland')
+    now = timezone.now().astimezone(auckland_tz)
+    today = now.date()
     
     # Get today's entries
     today_entries = TimeEntry.objects.filter(
@@ -47,6 +51,10 @@ def dashboard(request):
     
     context = {
         'today': today,
+        'current_datetime': now,
+        'formatted_date': now.strftime('%d/%m/%Y'),  # DD/MM/YYYY format
+        'formatted_time': now.strftime('%I:%M %p'),  # 12-hour format with AM/PM
+        'day_name': now.strftime('%A'),
         'today_entries': today_entries,
         'today_total': today_total,
         'form': form,
@@ -119,19 +127,23 @@ def daily_entry(request):
 @login_required
 def weekly_summary(request):
     """Weekly summary view showing current week with totals."""
+    # Get current date and week info
+    auckland_tz = pytz.timezone('Pacific/Auckland')
+    current_date = timezone.now().astimezone(auckland_tz).date()
+    current_year, current_week_num, _ = current_date.isocalendar()
+    
     # Get week start date from GET parameter or default to current week
-    week_start_str = request.GET.get('week_start')
-    if week_start_str:
-        try:
-            week_start = datetime.strptime(week_start_str, '%Y-%m-%d').date()
-            # Ensure it's a Monday
-            week_start = week_start - timedelta(days=week_start.weekday())
-        except ValueError:
-            today = timezone.now().date()
-            week_start = today - timedelta(days=today.weekday())
-    else:
-        today = timezone.now().date()
-        week_start = today - timedelta(days=today.weekday())
+    year = int(request.GET.get('year', current_year))
+    week = int(request.GET.get('week', current_week_num))
+    
+    # Prevent future weeks
+    if year > current_year or (year == current_year and week > current_week_num):
+        messages.warning(request, "Cannot view future weeks")
+        return redirect(f"{reverse('timesheet:weekly_summary')}?year={current_year}&week={current_week_num}")
+    
+    # Calculate week start from year and week number
+    jan_1 = date(year, 1, 1)
+    week_start = jan_1 + timedelta(weeks=week-1) - timedelta(days=jan_1.weekday())
     
     # Calculate week end
     week_end = week_start + timedelta(days=6)
@@ -147,22 +159,33 @@ def weekly_summary(request):
     weekly_total = Decimal('0.00')
     
     for i in range(7):
-        current_date = week_start + timedelta(days=i)
-        day_entries = [entry for entry in week_entries if entry.date == current_date]
+        current_date_iter = week_start + timedelta(days=i)
+        day_entries = [entry for entry in week_entries if entry.date == current_date_iter]
         day_total = sum(entry.total_hours() for entry in day_entries)
         weekly_total += day_total
         
         week_data.append({
-            'date': current_date,
-            'day_name': current_date.strftime('%A'),
+            'date': current_date_iter,
+            'day_name': current_date_iter.strftime('%A'),
+            'weekday': current_date_iter.weekday(),  # 0=Monday, 6=Sunday
             'entries': day_entries,
             'total': day_total,
-            'is_today': current_date == timezone.now().date(),
+            'is_today': current_date_iter == current_date,
         })
     
+    # Calculate statistics
+    days_worked = set(entry.date for entry in week_entries)
+    total_entries_count = len(week_entries)
+    
     # Navigation weeks
-    prev_week = week_start - timedelta(weeks=1)
-    next_week = week_start + timedelta(weeks=1)
+    prev_week_start = week_start - timedelta(weeks=1)
+    prev_year, prev_week_num, _ = prev_week_start.isocalendar()
+    
+    next_week_start = week_start + timedelta(weeks=1)
+    next_year, next_week_num, _ = next_week_start.isocalendar()
+    
+    # Don't show next week if it's in the future
+    show_next = not (next_year > current_year or (next_year == current_year and next_week_num > current_week_num))
     
     # Calculate daily average
     daily_average = round(float(weekly_total) / 7, 1) if weekly_total > 0 else 0
@@ -173,8 +196,15 @@ def weekly_summary(request):
         'week_data': week_data,
         'weekly_total': weekly_total,
         'daily_average': daily_average,
-        'prev_week': prev_week,
-        'next_week': next_week,
+        'days_worked': len(days_worked),
+        'total_entries': total_entries_count,
+        'current_week': week,
+        'current_year': year,
+        'prev_year': prev_year,
+        'prev_week': prev_week_num,
+        'next_year': next_year,
+        'next_week': next_week_num,
+        'show_next': show_next,
     }
     return render(request, 'timesheet/weekly_summary.html', context)
 
@@ -271,6 +301,42 @@ def job_delete(request, pk):
         'entry_count': entry_count,
     }
     return render(request, 'timesheet/job_delete.html', context)
+
+
+@login_required
+def entry_add(request):
+    """Add a new time entry."""
+    initial_data = {}
+    if 'job' in request.GET:
+        initial_data['job'] = request.GET['job']
+    if 'date' in request.GET:
+        try:
+            initial_data['date'] = datetime.strptime(request.GET['date'], '%Y-%m-%d').date()
+        except ValueError:
+            pass
+    
+    if request.method == 'POST':
+        form = TimeEntryForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            entry = form.save(commit=False)
+            entry.user = request.user
+            try:
+                entry.full_clean()
+                entry.save()
+                messages.success(request, 'Time entry added successfully!')
+                return redirect(f'{reverse("timesheet:daily_entry")}?date={entry.date}')
+            except ValidationError as e:
+                messages.error(request, f'Error: {e}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = TimeEntryForm(user=request.user, initial=initial_data)
+    
+    context = {
+        'form': form,
+        'title': 'Add Time Entry',
+    }
+    return render(request, 'timesheet/entry_form.html', context)
 
 
 @login_required

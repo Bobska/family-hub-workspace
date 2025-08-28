@@ -16,6 +16,7 @@ urlpatterns = [
     path('jobs/<int:pk>/delete/', views.job_delete, name='job_delete'),
     
     # Time entry management
+    path('entries/add/', views.entry_add, name='entry_add'),
     path('entries/<int:pk>/edit/', views.entry_edit, name='entry_edit'),
     path('entries/<int:pk>/delete/', views.entry_delete, name='entry_delete'),
     

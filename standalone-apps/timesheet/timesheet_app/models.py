@@ -9,18 +9,30 @@ class Job(models.Model):
     """Model representing a job/work location for timesheet entries."""
     name = models.CharField(max_length=100, blank=True)
     address = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True, help_text="Job description or notes")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='jobs')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['name', 'address']
         unique_together = ['user', 'name', 'address']
+
+    def clean(self):
+        """Validate that either name or address is provided."""
+        if not self.name and not self.address:
+            raise ValidationError("Either job name or address must be provided")
 
     def display_name(self):
         """Return name if exists, otherwise return address."""
         if self.name:
             return self.name
         return self.address if self.address else "Unnamed Job"
+
+    @property
+    def total_entries(self):
+        """Return total number of time entries for this job."""
+        return self.time_entries.count()
 
     def total_hours(self):
         """Calculate total hours worked for this job."""
@@ -40,7 +52,13 @@ class TimeEntry(models.Model):
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='time_entries')
-    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='time_entries')
+    job = models.ForeignKey(
+        Job, 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='time_entries'
+    )
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -99,4 +117,5 @@ class TimeEntry(models.Model):
         return max(hours, Decimal('0.00'))
 
     def __str__(self):
-        return f"{self.user.username} - {self.job} - {self.date} ({self.total_hours()}h)"
+        job_name = self.job.display_name() if self.job else "No Job Assigned"
+        return f"{self.user.username} - {job_name} - {self.date} ({self.total_hours()}h)"
