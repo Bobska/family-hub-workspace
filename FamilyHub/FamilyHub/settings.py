@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     # Core FamilyHub apps
     'home',
     
-    # Family management apps - will be added as they are developed
+    # Standalone apps - will be uncommented as they are developed
     # 'apps.timesheet_app',
     # 'apps.daycare_invoice_app',
     # 'apps.employment_history_app',
@@ -126,6 +126,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media files (User uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
