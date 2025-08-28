@@ -8,21 +8,25 @@ applyTo: '**'
 ### MANDATORY Testing & Commit Process
 **⚠️ NEVER commit untested code! Always follow this exact sequence:**
 
-1. **Test First, Commit Second**
+1. **Check Current Branch & Test First**
    ```bash
-   # 1. ALWAYS test your changes first
+   # 1. VERIFY you're on the correct feature branch
+   git branch --show-current
+   # Should show: feature/timesheet-app/[your-feature] or feature/[app-name]/[your-feature]
+   
+   # 2. ALWAYS test your changes first
    python manage.py check
    python manage.py makemigrations
    python manage.py migrate
    python manage.py runserver
    # -> Open browser and test functionality thoroughly
    
-   # 2. ONLY commit after successful testing
+   # 3. ONLY commit after successful testing
    git add .
-   git commit -m "feat: add timesheet entry validation logic"
+   git commit -m "feat(timesheet): add entry validation logic"
    
-   # 3. Push to repository
-   git push origin main
+   # 4. Push to feature branch (NOT main!)
+   git push origin feature/timesheet-app/validation-logic
    ```
 
 2. **Test Verification Requirements**
@@ -40,12 +44,35 @@ applyTo: '**'
 - **Development Phase**: Multi-app development and integration planning
 
 ### Current Applications Status
-1. **Timesheet App**: ✅ Requirements complete, ready for development
+1. **Timesheet App**: ✅ Feature branch active: `feature/timesheet-app`
 2. **Daycare Invoice Tracker**: ✅ Production-ready, needs integration
 3. **Employment History**: 📋 Planning phase
 4. **Upcoming Payments**: 📋 Planning phase
 5. **Credit Card Management**: 📋 Planning phase
 6. **Household Budget**: 📋 Planning phase
+
+### Git Branching Strategy (CRITICAL)
+**⚠️ ALWAYS work on feature branches - NEVER commit directly to main!**
+
+Current Active Branches:
+- `main` - Production-ready code only
+- `feature/timesheet-app` - Timesheet integration branch
+- `feature/timesheet-app/*` - Specific timesheet features
+
+Branch Creation Rules:
+```bash
+# For new timesheet features:
+git checkout feature/timesheet-app
+git checkout -b feature/timesheet-app/your-feature-name
+
+# For new apps (future):
+git checkout main
+git checkout -b feature/new-app-name
+
+# For app-specific features:
+git checkout feature/app-name
+git checkout -b feature/app-name/specific-feature
+```
 
 ## Git Commit Message Standards (2025 Best Practices)
 

@@ -24,7 +24,7 @@ function Start-Development {
     
     Write-Host "✅ Created and switched to branch: $BranchName" -ForegroundColor Green
     Write-Host "💡 This branch is based on: $AppBranch" -ForegroundColor Yellow
-    Write-Host "💡 When ready, merge back to $AppBranch, then $AppBranch -> $MainBranch" -ForegroundColor Yellow
+    Write-Host "💡 When ready, merge back to $AppBranch, then $AppBranch → $MainBranch" -ForegroundColor Yellow
 }
 
 function Test-Application {
