@@ -8,21 +8,23 @@ param(
 
 $ProjectDir = "C:\Users\Dmitry\OneDrive\Development\myprojects\family-hub-workspace\standalone-apps\timesheet"
 $MainBranch = "main"
+$AppBranch = "feature/timesheet-app"
 
 function Start-Development {
     Write-Host "🚀 Starting development workflow..." -ForegroundColor Green
     Set-Location $ProjectDir
     
-    # Ensure we're on main and up to date
-    git checkout main
-    git pull origin main
+    # Ensure we're on app branch and up to date
+    git checkout $AppBranch
+    git pull origin $AppBranch
     
-    # Create feature branch
-    $BranchName = Read-Host "Enter feature branch name (e.g., feature/new-feature)"
+    # Create feature branch from app branch
+    $BranchName = Read-Host "Enter feature branch name (e.g., feature/timesheet-validation, fix/template-bug)"
     git checkout -b $BranchName
     
     Write-Host "✅ Created and switched to branch: $BranchName" -ForegroundColor Green
-    Write-Host "💡 Remember to commit regularly and push your branch when ready for review!" -ForegroundColor Yellow
+    Write-Host "💡 This branch is based on: $AppBranch" -ForegroundColor Yellow
+    Write-Host "💡 When ready, merge back to $AppBranch, then $AppBranch → $MainBranch" -ForegroundColor Yellow
 }
 
 function Test-Application {
@@ -70,28 +72,37 @@ function Push-Branch {
 }
 
 function Merge-Branch {
-    Write-Host "🔀 Merging to main branch..." -ForegroundColor Green
+    Write-Host "🔀 Merging branch..." -ForegroundColor Green
     Set-Location $ProjectDir
     
     $CurrentBranch = git branch --show-current
     
-    # Switch to main and update
-    git checkout main
-    git pull origin main
-    
-    # Merge feature branch
-    git merge $CurrentBranch
-    git push origin main
-    
-    # Clean up feature branch
-    $DeleteBranch = Read-Host "Delete feature branch '$CurrentBranch'? (y/N)"
-    if ($DeleteBranch -match "^[Yy]$") {
-        git branch -d $CurrentBranch
-        git push origin --delete $CurrentBranch
-        Write-Host "✅ Feature branch deleted" -ForegroundColor Green
+    # Determine merge target
+    if ($CurrentBranch -eq $AppBranch) {
+        # Merging app branch to main
+        Write-Host "🎯 Merging $AppBranch to $MainBranch" -ForegroundColor Cyan
+        git checkout $MainBranch
+        git pull origin $MainBranch
+        git merge $AppBranch
+        git push origin $MainBranch
+        Write-Host "✅ App merged to main! 🎉" -ForegroundColor Green
+    } else {
+        # Merging feature/fix branch to app branch
+        Write-Host "🎯 Merging $CurrentBranch to $AppBranch" -ForegroundColor Cyan
+        git checkout $AppBranch
+        git pull origin $AppBranch
+        git merge $CurrentBranch
+        git push origin $AppBranch
+        
+        # Clean up feature branch
+        $DeleteBranch = Read-Host "Delete feature branch '$CurrentBranch'? (y/N)"
+        if ($DeleteBranch -match "^[Yy]$") {
+            git branch -d $CurrentBranch
+            git push origin --delete $CurrentBranch
+            Write-Host "✅ Feature branch deleted" -ForegroundColor Green
+        }
+        Write-Host "✅ Feature merged to app branch!" -ForegroundColor Green
     }
-    
-    Write-Host "✅ Changes merged to main!" -ForegroundColor Green
 }
 
 function Show-Status {
@@ -110,19 +121,27 @@ function Show-Status {
 function Show-Help {
     Write-Host "🔧 FamilyHub Timesheet Development Workflow" -ForegroundColor Magenta
     Write-Host ""
+    Write-Host "🌿 Branching Strategy:" -ForegroundColor Yellow
+    Write-Host "  main ← feature/timesheet-app ← feature/your-feature"
+    Write-Host ""
     Write-Host "Available commands:" -ForegroundColor Yellow
-    Write-Host "  start   - Create new feature branch from main"
+    Write-Host "  start   - Create new feature branch from app branch"
     Write-Host "  test    - Run tests and start development server"
     Write-Host "  commit  - Stage and commit changes"
     Write-Host "  push    - Push current branch to remote"
-    Write-Host "  merge   - Merge current branch to main"
+    Write-Host "  merge   - Merge current branch (feature→app or app→main)"
     Write-Host "  status  - Show project and git status"
     Write-Host ""
-    Write-Host "Example usage:" -ForegroundColor Yellow
-    Write-Host "  .\dev-workflow.ps1 start"
-    Write-Host "  .\dev-workflow.ps1 test"
-    Write-Host "  .\dev-workflow.ps1 commit"
-    Write-Host "  .\dev-workflow.ps1 push"
+    Write-Host "Example workflow:" -ForegroundColor Yellow
+    Write-Host "  .\dev-workflow.ps1 start     # Create feature branch"
+    Write-Host "  # ... make changes ..."
+    Write-Host "  .\dev-workflow.ps1 commit    # Commit changes"
+    Write-Host "  .\dev-workflow.ps1 push      # Push feature branch"
+    Write-Host "  .\dev-workflow.ps1 merge     # Merge to app branch"
+    Write-Host ""
+    Write-Host "  # When app is complete:"
+    Write-Host "  git checkout feature/timesheet-app"
+    Write-Host "  .\dev-workflow.ps1 merge     # Merge app to main"
 }
 
 # Main script logic

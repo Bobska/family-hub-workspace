@@ -5,6 +5,7 @@
 
 PROJECT_DIR="C:/Users/Dmitry/OneDrive/Development/myprojects/family-hub-workspace/standalone-apps/timesheet"
 MAIN_BRANCH="main"
+APP_BRANCH="feature/timesheet-app"
 
 case "$1" in
     "start")

@@ -40,22 +40,38 @@ Visit: http://127.0.0.1:8001/
 ## 🔄 Development Workflow
 
 ### ✅ Best Practices
-1. **Always work on feature branches** - Never commit directly to main
+1. **Use proper branch hierarchy** - Work on feature branches from app branch
 2. **Test before committing** - Ensure all functionality works
 3. **Use descriptive commit messages** - Follow conventional commit format
 4. **Regular commits** - Small, focused commits are better
 5. **Code review** - Use pull requests for all changes
 
-### 🌿 Branch Management
+### 🌿 Branch Management Strategy
+
+#### **Branch Hierarchy:**
+```
+main (production-ready code)
+└── feature/timesheet-app (long-running app development)
+    ├── feature/timesheet-validation (specific feature)
+    ├── feature/timesheet-ui-improvements (specific feature)
+    ├── fix/template-syntax-error (bug fixes)
+    └── feature/timesheet-reporting (specific feature)
+```
+
+#### **Workflow Process:**
+1. **Main Branch** (`main`): Production-ready, stable code
+2. **App Branch** (`feature/timesheet-app`): Integration branch for entire timesheet app
+3. **Feature Branches**: Specific features/fixes within the app
+4. **Merge Path**: Feature → App → Main (after full testing)
 
 #### Creating a New Feature
 ```powershell
-# Option 1: Use the workflow script
+# Option 1: Use the workflow script (recommended)
 .\dev-workflow.ps1 start
 
 # Option 2: Manual process
-git checkout main
-git pull origin main
+git checkout feature/timesheet-app
+git pull origin feature/timesheet-app
 git checkout -b feature/your-feature-name
 ```
 
@@ -71,13 +87,38 @@ git checkout -b feature/your-feature-name
 .\dev-workflow.ps1 push
 ```
 
-#### Merging Back to Main
+#### Merging Completed Features
 ```powershell
-# After code review approval
+# Merge feature to app branch
+.\dev-workflow.ps1 merge
+
+# When entire app is complete, merge app to main:
+git checkout feature/timesheet-app
 .\dev-workflow.ps1 merge
 ```
 
-### 📝 Commit Message Convention
+### 🎯 **Why This Branching Strategy?**
+
+#### **For Large Applications Like Timesheet:**
+- **Long Development Cycle**: Timesheet app has many features (jobs, entries, reports, etc.)
+- **Multiple Developers**: Different people can work on different features simultaneously
+- **Integration Testing**: All features need to work together before going to main
+- **Hotfixes**: Can fix bugs in the app without affecting main branch stability
+
+#### **Branch Purposes:**
+- **`main`**: Always deployable, production-ready code
+- **`feature/timesheet-app`**: Integration branch for entire timesheet application
+- **`feature/timesheet-*`**: Individual features within the app
+- **`fix/timesheet-*`**: Bug fixes within the app
+
+#### **Example Development Flow:**
+```
+1. Developer A: feature/timesheet-app → feature/timesheet-models → merge back
+2. Developer B: feature/timesheet-app → feature/timesheet-views → merge back  
+3. Developer C: feature/timesheet-app → fix/template-syntax → merge back
+4. Integration testing on feature/timesheet-app
+5. When stable: feature/timesheet-app → main
+```
 Follow conventional commits format:
 ```
 type(scope): description
