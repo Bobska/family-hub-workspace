@@ -52,7 +52,7 @@ def dashboard(request):
     context = {
         'today': today,
         'current_datetime': now,
-        'formatted_date': now.strftime('%d/%m/%Y'),  # DD/MM/YYYY format
+        'formatted_date': now.strftime('%-d %B, %Y'),  # "29 August, 2025"
         'formatted_time': now.strftime('%I:%M %p'),  # 12-hour format with AM/PM
         'day_name': now.strftime('%A'),
         'today_entries': today_entries,
