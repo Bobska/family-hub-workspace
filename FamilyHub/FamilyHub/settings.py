@@ -37,7 +37,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Core FamilyHub apps
     'home',
+    
+    # Family management apps - will be added as they are developed
+    # 'apps.timesheet_app',
+    # 'apps.daycare_invoice_app',
+    # 'apps.employment_history_app',
+    # 'apps.upcoming_payments_app',
+    # 'apps.credit_card_mgmt_app',
+    # 'apps.household_budget_app',
 ]
 
 MIDDLEWARE = [
