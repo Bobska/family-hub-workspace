@@ -89,8 +89,7 @@ class TimeEntry(models.Model):
                 # Check if this entry overlaps with existing entries
                 if (self.start_time < entry.end_time and self.end_time > entry.start_time):
                     raise ValidationError(
-                        f'This time entry overlaps with existing entry: '
-                        f'{entry.start_time} - {entry.end_time} for {entry.job}'
+                        f"Time overlaps with: {entry.start_time.strftime('%H:%M')} - {entry.end_time.strftime('%H:%M')} at {entry.job}"
                     )
 
     def total_hours(self):
@@ -115,6 +114,24 @@ class TimeEntry(models.Model):
         # Convert to hours (decimal)
         hours = Decimal(str(work_minutes / 60)).quantize(Decimal('0.01'))
         return max(hours, Decimal('0.00'))
+
+    def total_hours_timedelta(self):
+        """Return total hours as timedelta for calculations"""
+        from datetime import datetime, timedelta
+        
+        # Create datetime objects for time calculation
+        start = datetime.combine(self.date, self.start_time)
+        end = datetime.combine(self.date, self.end_time)
+        
+        # Handle overnight shifts
+        if end < start:
+            end += timedelta(days=1)
+        
+        # Calculate total time and subtract break
+        total = end - start
+        break_time = timedelta(minutes=self.break_duration)
+        
+        return total - break_time
 
     def __str__(self):
         job_name = self.job.display_name() if self.job else "No Job Assigned"

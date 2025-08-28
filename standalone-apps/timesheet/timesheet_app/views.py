@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count, F, DurationField
+from django.db.models.functions import Cast
 from django.urls import reverse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -217,16 +218,16 @@ def weekly_summary(request):
 
 @login_required
 def job_list(request):
-    """List all jobs for the current user."""
-    jobs = Job.objects.filter(user=request.user).order_by('name', 'address')
+    """List all jobs for the current user with optimized queries."""
+    # Optimized query with annotations
+    jobs = Job.objects.filter(user=request.user).annotate(
+        entry_count=Count('time_entries')
+    ).order_by('name', 'address')
     
-    # Calculate statistics
+    # Calculate statistics using annotations
     total_jobs = jobs.count()
-    total_entries = sum(job.time_entries.count() for job in jobs)
-    total_hours = sum(
-        sum(entry.total_hours() for entry in job.time_entries.all()) 
-        for job in jobs
-    )
+    total_entries = sum(job.entry_count for job in jobs)
+    total_hours = sum(job.total_hours() for job in jobs)  # Keep using model method for accuracy
     avg_entries_per_job = round(total_entries / total_jobs, 1) if total_jobs > 0 else 0
     
     context = {
