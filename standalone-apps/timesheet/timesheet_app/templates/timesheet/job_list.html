@@ -1,6 +1,13 @@
 {% extends 'timesheet/base.html' %}
 
-{% block title %}Jobs - Timesheet{% endblock %}
+{% block title %}Jobs - Tim                                    <div class="card bg-light">
+                                    <div class="card-body py-2">
+                                        <h6 class="mb-0 text-primary">
+                                            {{ job.time_entries.count }}
+                                        </h6>
+                                        <small class="text-muted">Total Entries</small>
+                                    </div>
+                                </div> endblock %}
 
 {% block content %}
 <div class="row">
@@ -77,12 +84,7 @@
                                 <div class="card bg-light">
                                     <div class="card-body py-2">
                                         <h6 class="mb-0 text-success">
-                                            {% with total_hours=0 %}
-                                                {% for entry in job.timeentry_set.all %}
-                                                    {% with total_hours=total_hours|add:entry.total_hours %}{% endwith %}
-                                                {% endfor %}
-                                                {{ total_hours|floatformat:1 }}h
-                                            {% endwith %}
+                                            {{ job.total_hours|floatformat:1 }}h
                                         </h6>
                                         <small class="text-muted">Total Hours</small>
                                     </div>
@@ -91,7 +93,7 @@
                         </div>
                         
                         <!-- Recent Entry -->
-                        {% with recent_entry=job.timeentry_set.last %}
+                        {% with recent_entry=job.time_entries.last %}
                             {% if recent_entry %}
                                 <div class="mt-3 pt-3 border-top">
                                     <small class="text-muted">
@@ -153,53 +155,24 @@
                     <div class="row text-center">
                         <div class="col-md-3">
                             <div class="border-end">
-                                <h4 class="text-primary">{{ jobs.count }}</h4>
+                                <h4 class="text-primary">{{ total_jobs }}</h4>
                                 <small class="text-muted">Total Jobs</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="border-end">
-                                <h4 class="text-success">
-                                    {% with total_entries=0 %}
-                                        {% for job in jobs %}
-                                            {% with total_entries=total_entries|add:job.timeentry_set.count %}{% endwith %}
-                                        {% endfor %}
-                                        {{ total_entries }}
-                                    {% endwith %}
-                                </h4>
+                                <h4 class="text-success">{{ total_entries }}</h4>
                                 <small class="text-muted">Total Entries</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="border-end">
-                                <h4 class="text-info">
-                                    {% with total_hours=0 %}
-                                        {% for job in jobs %}
-                                            {% for entry in job.timeentry_set.all %}
-                                                {% with total_hours=total_hours|add:entry.total_hours %}{% endwith %}
-                                            {% endfor %}
-                                        {% endfor %}
-                                        {{ total_hours|floatformat:1 }}h
-                                    {% endwith %}
-                                </h4>
+                                <h4 class="text-info">{{ total_hours|floatformat:1 }}h</h4>
                                 <small class="text-muted">Total Hours</small>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <h4 class="text-warning">
-                                {% with avg_entries=jobs.count %}
-                                    {% if avg_entries > 0 %}
-                                        {% with total_entries=0 %}
-                                            {% for job in jobs %}
-                                                {% with total_entries=total_entries|add:job.timeentry_set.count %}{% endwith %}
-                                            {% endfor %}
-                                            {{ total_entries|div:avg_entries|floatformat:1 }}
-                                        {% endwith %}
-                                    {% else %}
-                                        0
-                                    {% endif %}
-                                {% endwith %}
-                            </h4>
+                            <h4 class="text-warning">{{ avg_entries_per_job }}</h4>
                             <small class="text-muted">Avg Entries/Job</small>
                         </div>
                     </div>

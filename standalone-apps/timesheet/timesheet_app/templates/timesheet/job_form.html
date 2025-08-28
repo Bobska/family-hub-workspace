@@ -107,26 +107,21 @@
                     <div class="row text-center">
                         <div class="col-md-4">
                             <div class="border-end">
-                                <h5 class="text-primary">{{ job.timeentry_set.count }}</h5>
+                                <h5 class="text-primary">{{ job.time_entries.count }}</h5>
                                 <small class="text-muted">Time Entries</small>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="border-end">
                                 <h5 class="text-success">
-                                    {% with total_hours=0 %}
-                                        {% for entry in job.timeentry_set.all %}
-                                            {% with total_hours=total_hours|add:entry.total_hours %}{% endwith %}
-                                        {% endfor %}
-                                        {{ total_hours|floatformat:1 }}h
-                                    {% endwith %}
+                                    {{ job.total_hours|floatformat:1 }}h
                                 </h5>
                                 <small class="text-muted">Total Hours</small>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <h5 class="text-info">
-                                {% with recent_entry=job.timeentry_set.last %}
+                                {% with recent_entry=job.time_entries.last %}
                                     {% if recent_entry %}
                                         {{ recent_entry.date|date:"M d" }}
                                     {% else %}
@@ -138,10 +133,10 @@
                         </div>
                     </div>
                     
-                    {% if job.timeentry_set.exists %}
+                    {% if job.time_entries.exists %}
                         <div class="mt-3 pt-3 border-top">
                             <h6 class="mb-3">Recent Time Entries</h6>
-                            {% for entry in job.timeentry_set.all|slice:":3" %}
+                            {% for entry in job.time_entries.all|slice:":3" %}
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div>
                                         <strong>{{ entry.date|date:"M d, Y" }}</strong>
@@ -159,10 +154,10 @@
                                     </div>
                                 </div>
                             {% endfor %}
-                            {% if job.timeentry_set.count > 3 %}
+                            {% if job.time_entries.count > 3 %}
                                 <div class="text-center mt-3">
                                     <small class="text-muted">
-                                        And {{ job.timeentry_set.count|add:"-3" }} more entries...
+                                        And {{ job.time_entries.count|add:"-3" }} more entries...
                                     </small>
                                 </div>
                             {% endif %}

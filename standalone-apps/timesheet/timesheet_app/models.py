@@ -22,6 +22,10 @@ class Job(models.Model):
             return self.name
         return self.address if self.address else "Unnamed Job"
 
+    def total_hours(self):
+        """Calculate total hours worked for this job."""
+        return sum(entry.total_hours() for entry in self.time_entries.all())
+
     def __str__(self):
         return self.display_name()
 
@@ -56,8 +60,8 @@ class TimeEntry(models.Model):
         if self.start_time and self.end_time and self.start_time >= self.end_time:
             raise ValidationError('End time must be after start time.')
         
-        # Check for overlapping entries
-        if self.user and self.date and self.start_time and self.end_time:
+        # Check for overlapping entries only if all required fields are present
+        if hasattr(self, 'user') and self.user and self.date and self.start_time and self.end_time:
             overlapping_entries = TimeEntry.objects.filter(
                 user=self.user,
                 date=self.date

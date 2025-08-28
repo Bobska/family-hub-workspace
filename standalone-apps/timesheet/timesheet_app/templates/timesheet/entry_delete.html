@@ -135,7 +135,7 @@
                         <h6 class="text-muted">Current Daily Total</h6>
                         <span class="h5 text-primary">
                             {% with daily_total=0 %}
-                                {% for other_entry in entry.user.timeentry_set.all %}
+                                {% for other_entry in entry.user.time_entries.all %}
                                     {% if other_entry.date == entry.date %}
                                         {% with daily_total=daily_total|add:other_entry.total_hours %}{% endwith %}
                                     {% endif %}
@@ -148,7 +148,7 @@
                         <h6 class="text-muted">After Deletion</h6>
                         <span class="h5 text-warning">
                             {% with daily_total=0 %}
-                                {% for other_entry in entry.user.timeentry_set.all %}
+                                {% for other_entry in entry.user.time_entries.all %}
                                     {% if other_entry.date == entry.date and other_entry.pk != entry.pk %}
                                         {% with daily_total=daily_total|add:other_entry.total_hours %}{% endwith %}
                                     {% endif %}

@@ -164,11 +164,15 @@ def weekly_summary(request):
     prev_week = week_start - timedelta(weeks=1)
     next_week = week_start + timedelta(weeks=1)
     
+    # Calculate daily average
+    daily_average = round(float(weekly_total) / 7, 1) if weekly_total > 0 else 0
+    
     context = {
         'week_start': week_start,
         'week_end': week_end,
         'week_data': week_data,
         'weekly_total': weekly_total,
+        'daily_average': daily_average,
         'prev_week': prev_week,
         'next_week': next_week,
     }
@@ -180,8 +184,21 @@ def job_list(request):
     """List all jobs for the current user."""
     jobs = Job.objects.filter(user=request.user).order_by('name', 'address')
     
+    # Calculate statistics
+    total_jobs = jobs.count()
+    total_entries = sum(job.time_entries.count() for job in jobs)
+    total_hours = sum(
+        sum(entry.total_hours() for entry in job.time_entries.all()) 
+        for job in jobs
+    )
+    avg_entries_per_job = round(total_entries / total_jobs, 1) if total_jobs > 0 else 0
+    
     context = {
         'jobs': jobs,
+        'total_jobs': total_jobs,
+        'total_entries': total_entries,
+        'total_hours': total_hours,
+        'avg_entries_per_job': avg_entries_per_job,
     }
     return render(request, 'timesheet/job_list.html', context)
 
