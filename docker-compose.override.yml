@@ -1,0 +1,12 @@
+services:
+  web:
+    volumes:
+      - ./FamilyHub:/app
+      - ./standalone-apps:/standalone-apps
+      - ./shared:/shared
+    environment:
+      - DJANGO_SETTINGS_MODULE=FamilyHub.settings
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app:/standalone-apps:/shared
+    command: python manage.py runserver 0.0.0.0:8000

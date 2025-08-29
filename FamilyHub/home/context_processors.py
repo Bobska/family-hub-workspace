@@ -3,6 +3,7 @@ Context processors for FamilyHub home app.
 Provides global template context for environment and server information.
 """
 
+import os
 import socket
 from django.conf import settings
 from django.http import HttpRequest
@@ -16,7 +17,8 @@ def environment_context(request: HttpRequest) -> dict:
         dict: Context data including environment, server info, and host details
     """
     # Determine environment mode
-    if hasattr(settings, 'DEBUG') and settings.DEBUG:
+    debug = getattr(settings, 'DEBUG', False)
+    if debug:
         environment = 'Development'
         env_class = 'warning'
         env_icon = '🔧'
@@ -25,20 +27,18 @@ def environment_context(request: HttpRequest) -> dict:
         env_class = 'danger'
         env_icon = '🚀'
     
+    # Check if running in Docker
+    in_docker = os.path.exists('/.dockerenv')
+    
     # Get server information
-    allowed_hosts = getattr(settings, 'ALLOWED_HOSTS', [])
-    if allowed_hosts and allowed_hosts[0] not in ['*', '0.0.0.0']:
-        server_host = allowed_hosts[0]
+    if in_docker:
+        server_type = 'Django in Docker'
+        environment_label = 'Docker'
     else:
-        server_host = 'localhost'
-    
-    if server_host in ['*', '0.0.0.0']:
-        server_host = 'All Interfaces'
-    
-    # Determine server type and database
-    server_type = 'Django Development Server'
+        server_type = 'Native Django'
+        environment_label = 'Local'
+    # Determine database type
     database_engine = 'SQLite'
-    
     if hasattr(settings, 'DATABASES'):
         db_engine = settings.DATABASES.get('default', {}).get('ENGINE', '')
         if 'postgresql' in db_engine:
@@ -47,33 +47,32 @@ def environment_context(request: HttpRequest) -> dict:
             database_engine = 'MySQL'
         elif 'sqlite' in db_engine:
             database_engine = 'SQLite'
+        elif 'mssql' in db_engine or 'sql_server' in db_engine:
+            database_engine = 'SQL Server'
     
-    # Check if running in Docker
-    docker_mode = 'settings_docker' in getattr(settings, 'SETTINGS_MODULE', '')
-    if docker_mode:
-        server_type = 'Django in Docker'
-        server_host = 'Docker Container'
-    
-    # Get current port from request
-    port = request.get_port() if hasattr(request, 'get_port') else '8000'
+    # Get server host from request
+    server_host = request.get_host() if hasattr(request, 'get_host') else 'localhost:8000'
     
     # Build server URL
     protocol = 'https' if request.is_secure() else 'http'
-    current_host = request.get_host() if hasattr(request, 'get_host') else f'localhost:{port}'
-    server_url = f"{protocol}://{current_host}"
+    server_url = f"{protocol}://{server_host}"
     
     return {
+        'debug': debug,
+        'database_engine': database_engine,
+        'in_docker': in_docker,
+        'server_host': server_host,
+        'environment_label': environment_label,
         'environment_info': {
             'mode': environment,
             'mode_class': env_class,
             'mode_icon': env_icon,
-            'debug': getattr(settings, 'DEBUG', False),
+            'debug': debug,
             'server_type': server_type,
             'server_host': server_host,
             'server_url': server_url,
-            'port': port,
             'database': database_engine,
-            'docker_mode': docker_mode,
-            'settings_module': getattr(settings, 'SETTINGS_MODULE', 'Unknown'),
+            'docker_mode': in_docker,
+            'environment_label': environment_label,
         }
     }

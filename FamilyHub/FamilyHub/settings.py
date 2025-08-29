@@ -10,26 +10,38 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Add shared apps to Python path for dual deployment
-sys.path.insert(0, str(BASE_DIR.parent / 'shared' / 'apps'))
+# Docker-aware path resolution
+IN_DOCKER = os.path.exists('/.dockerenv')
+
+if IN_DOCKER:
+    # In Docker container, use absolute paths
+    sys.path.insert(0, '/standalone-apps')
+    sys.path.insert(0, '/shared')
+else:
+    # Local development, use relative paths
+    sys.path.insert(0, str(BASE_DIR.parent / 'standalone-apps'))
+    sys.path.insert(0, str(BASE_DIR.parent / 'shared' / 'apps'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!+sc#yqiyk6&6e6($ansiej6t)v1$4if*!m*d6%ay&63l-32xh'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-!+sc#yqiyk6&6e6($ansiej6t)v1$4if*!m*d6%ay&63l-32xh')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes', 'on')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+# Handle ALLOWED_HOSTS from environment
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0')
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
 
 
 # Application definition
@@ -45,15 +57,8 @@ INSTALLED_APPS = [
     # Core FamilyHub apps
     'home',
     
-    # Shared integrated apps
-    'timesheet',  # Shared timesheet app from shared/apps/timesheet/
-    
-    # Future standalone apps - will be uncommented as they are developed
-    # 'apps.daycare_invoice_app',
-    # 'apps.employment_history_app',
-    # 'apps.upcoming_payments_app',
-    # 'apps.credit_card_mgmt_app',
-    # 'apps.household_budget_app',
+    # Integrated timesheet app
+    'timesheet.timesheet_app',
 ]
 
 MIDDLEWARE = [
@@ -90,12 +95,20 @@ WSGI_APPLICATION = 'FamilyHub.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use DATABASE_URL if available (Docker), otherwise SQLite for local development
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
