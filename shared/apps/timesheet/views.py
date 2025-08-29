@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta, date
 from decimal import Decimal
 from zoneinfo import ZoneInfo  # Python 3.9+ standard library
+import pytz  # For backward compatibility
 from .models import Job, TimeEntry
 from .forms import JobForm, TimeEntryForm, QuickTimeEntryForm, DateFilterForm
 from .app_settings import get_timesheet_settings, get_app_context

@@ -33,10 +33,19 @@ Write-Host "Mode: $Mode" -ForegroundColor Yellow
 Write-Host ""
 
 # Add make to PATH if available
-$makePath = "$env:USERPROFILE\AppData\Local\Microsoft\WinGet\Packages\ezwinports.make_Microsoft.Winget.Source_8wekyb3d8bbwe\bin"
-if (Test-Path $makePath) {
-    $env:PATH += ";$makePath"
+$toolsPath = "$env:USERPROFILE\Tools\bin"
+if (Test-Path "$toolsPath\make.exe") {
+    $env:PATH += ";$toolsPath"
     Write-Host "✅ GNU Make available" -ForegroundColor Green
+} else {
+    # Fallback to WinGet installed location
+    $makePath = "$env:USERPROFILE\AppData\Local\Microsoft\WinGet\Packages\ezwinports.make_Microsoft.Winget.Source_8wekyb3d8bbwe\bin"
+    if (Test-Path "$makePath\make.exe") {
+        $env:PATH += ";$makePath"
+        Write-Host "✅ GNU Make available (fallback location)" -ForegroundColor Yellow
+    } else {
+        Write-Host "⚠️ GNU Make not found - Docker commands will use docker-compose directly" -ForegroundColor Yellow
+    }
 }
 
 switch ($Mode) {

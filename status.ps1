@@ -61,7 +61,6 @@ if ($postgres.TcpTestSucceeded) { $runningServices += "PostgreSQL" }
 if ($redis.TcpTestSucceeded) { $runningServices += "Redis" }
 
 $totalExpectedServices = 4  # FamilyHub + Timesheet + PostgreSQL + Redis
-$coreServices = 3          # FamilyHub + PostgreSQL + Redis (minimum for basic operation)
 
 Write-Host ""
 Write-Host "Environment Summary:" -ForegroundColor Cyan
@@ -72,15 +71,15 @@ if ($runningServices.Count -gt 0) {
 
 if ($runningServices.Count -eq 4) {
     Write-Host ""
-    Write-Host "  🎉 All services are running! Your development environment is ready." -ForegroundColor Green
+    Write-Host "  SUCCESS: All services are running! Your development environment is ready." -ForegroundColor Green
 } elseif ($runningServices.Count -eq 0) {
     Write-Host ""
-    Write-Host "  ⚠️  No services running. Use .\weekend-setup.ps1 to start the environment." -ForegroundColor Yellow
+    Write-Host "  WARNING: No services running. Use .\weekend-setup.ps1 to start the environment." -ForegroundColor Yellow
 } else {
     Write-Host ""
     if ($timesheet.TcpTestSucceeded) {
-        Write-Host "  ℹ️  Partial setup. All core services running." -ForegroundColor Green
+        Write-Host "  INFO: All core services running." -ForegroundColor Green
     } else {
-        Write-Host "  ⚠️  Timesheet not running. Use .\scripts\quick.ps1 timesheet to start it." -ForegroundColor Yellow
+        Write-Host "  ACTION NEEDED: Timesheet not running. Use .\scripts\quick.ps1 timesheet to start it." -ForegroundColor Yellow
     }
 }
