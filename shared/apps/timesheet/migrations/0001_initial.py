@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                 ('break_duration', models.IntegerField(choices=[(0, 'No break'), (30, '30 minutes'), (60, '1 hour')], default=0, help_text='Break duration in minutes')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_entries', to='timesheet_app.job')),
+                ('job', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_entries', to='timesheet.job')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_entries', to=settings.AUTH_USER_MODEL)),
             ],
             options={

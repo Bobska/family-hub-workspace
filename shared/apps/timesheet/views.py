@@ -9,16 +9,20 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta, date
 from decimal import Decimal
-import pytz
+from zoneinfo import ZoneInfo  # Python 3.9+ standard library
 from .models import Job, TimeEntry
 from .forms import JobForm, TimeEntryForm, QuickTimeEntryForm, DateFilterForm
+from .app_settings import get_timesheet_settings, get_app_context
 
 
 @login_required
 def dashboard(request):
     """Dashboard view showing today's overview with quick entry form."""
+    # Get app settings for deployment-specific behavior
+    settings = get_timesheet_settings()
+    
     # Set timezone to Auckland
-    auckland_tz = pytz.timezone('Pacific/Auckland')
+    auckland_tz = ZoneInfo(settings.timezone)
     now = timezone.now().astimezone(auckland_tz)
     today = now.date()
     
@@ -65,17 +69,20 @@ def dashboard(request):
     else:
         form = QuickTimeEntryForm(user=request.user)
     
-    context = {
-        'today': today,
-        'current_datetime': now,
-        'formatted_date': now.strftime('%d %B, %Y').lstrip('0'),  # "29 August, 2025" (Windows compatible)
-        'formatted_time': now.strftime('%I:%M %p'),  # 12-hour format with AM/PM
-        'day_name': now.strftime('%A'),
-        'today_entries': today_entries,
-        'today_total': today_total,
-        'form': form,
-        'has_jobs': Job.objects.filter(user=request.user).exists(),
-    }
+    # Get base context from app settings and add view-specific data
+    context = get_app_context(
+        request=request,
+        today=today,
+        current_datetime=now,
+        formatted_date=now.strftime('%d %B, %Y').lstrip('0'),  # "29 August, 2025" (Windows compatible)
+        formatted_time=now.strftime('%I:%M %p'),  # 12-hour format with AM/PM
+        day_name=now.strftime('%A'),
+        today_entries=today_entries,
+        today_total=today_total,
+        form=form,
+        has_jobs=Job.objects.filter(user=request.user).exists(),
+    )
+    
     return render(request, 'timesheet/dashboard.html', context)
 
 
