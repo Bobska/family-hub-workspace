@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Quick Development
+  postgres-dev:
+    image: postgres:17.6
+    container_name: familyhub-postgres-quick
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: familyhub
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_quick_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - familyhub_quick_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U django -d familyhub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin for Database Management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: familyhub-pgadmin-quick
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@familyhub.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_quick_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - familyhub_quick_network
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+
+volumes:
+  postgres_quick_data:
+  pgadmin_quick_data:
+
+networks:
+  familyhub_quick_network:
+    driver: bridge

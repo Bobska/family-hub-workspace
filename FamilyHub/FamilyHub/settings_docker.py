@@ -33,8 +33,8 @@ INSTALLED_APPS = [
     # Core FamilyHub apps
     'home',
     
-    # Shared integrated apps
-    'timesheet',  # Shared timesheet app from shared/apps/timesheet/
+    # Integrated apps (remove timesheet until properly configured)
+    # 'apps.timesheet',  # Disable until timesheet app is properly set up
     
     # Future standalone apps - will be uncommented as they are developed
     # 'apps.daycare_invoice_app',

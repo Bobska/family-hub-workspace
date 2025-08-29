@@ -9,7 +9,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),  # Include home app URLs
     path('accounts/', include('django.contrib.auth.urls')),  # Authentication URLs
-    path('timesheet/', include('timesheet.urls')),  # Shared timesheet app
+    # Temporarily commented out until timesheet app is properly configured
+    # path('timesheet/', include('timesheet.urls')),  # Shared timesheet app
     
     # Health check endpoints
     # Temporarily commented out for basic testing

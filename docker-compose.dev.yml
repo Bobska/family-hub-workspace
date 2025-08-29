@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:17.6
+    container_name: familyhub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: familyhub
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: your_secure_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - familyhub_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U django_user -d familyhub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Caching and Celery
+  redis:
+    image: redis:7-alpine
+    container_name: familyhub-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - familyhub_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django Web Application
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.simple
+    container_name: familyhub-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://django_user:your_secure_password@db:5432/familyhub
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - SECRET_KEY=your-dev-secret-key-here
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,web
+      - DJANGO_SETTINGS_MODULE=FamilyHub.settings_docker
+    volumes:
+      - ./FamilyHub:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    networks:
+      - familyhub_network
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Celery Worker
+  celery:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: familyhub-celery
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://django_user:your_secure_password@db:5432/familyhub
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - SECRET_KEY=your-dev-secret-key-here
+      - DJANGO_SETTINGS_MODULE=FamilyHub.settings_docker
+    volumes:
+      - ./FamilyHub:/app
+    networks:
+      - familyhub_network
+    command: celery -A FamilyHub worker -l info
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: familyhub-celery-beat
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - DEBUG=True
+      - DATABASE_URL=postgresql://django_user:your_secure_password@db:5432/familyhub
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - SECRET_KEY=your-dev-secret-key-here
+      - DJANGO_SETTINGS_MODULE=FamilyHub.settings_docker
+    volumes:
+      - ./FamilyHub:/app
+    networks:
+      - familyhub_network
+    command: celery -A FamilyHub beat -l info
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  familyhub_network:
+    driver: bridge
