@@ -10,10 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Add shared apps to Python path for dual deployment
+sys.path.insert(0, str(BASE_DIR.parent.parent / 'shared' / 'apps'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'timesheet_app',
+    'timesheet',  # Shared timesheet app from shared/apps/timesheet/
 ]
 
 MIDDLEWARE = [
@@ -138,3 +142,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'  # Redirect to dashboard after login
 LOGOUT_REDIRECT_URL = '/accounts/login/'  # Redirect to login after logout
+
+# Deployment context flag for dual deployment strategy
+IS_STANDALONE = True
