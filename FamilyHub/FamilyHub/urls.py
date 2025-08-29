@@ -2,12 +2,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from .health_views import health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),  # Include home app URLs
     path('accounts/', include('django.contrib.auth.urls')),  # Authentication URLs
     path('timesheet/', include('timesheet.urls')),  # Shared timesheet app
+    
+    # Health check endpoints
+    path('health/', health_check, name='health_check'),
 ]
 
 if settings.DEBUG:

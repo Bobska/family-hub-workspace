@@ -1,0 +1,8 @@
+# PostgreSQL Data Persistence Directory
+# This directory will store PostgreSQL backup data
+# The main data volume is handled by Docker volumes
+# This directory can be used for database dumps and backups
+
+*.sql
+*.dump
+*.backup

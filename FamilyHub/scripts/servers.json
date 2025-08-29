@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "FamilyHub PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "familyhub",
+      "Username": "familyhub_user",
+      "Password": "changeme123",
+      "SSLMode": "prefer",
+      "Favorite": true
+    }
+  }
+}

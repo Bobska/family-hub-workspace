@@ -1,0 +1,185 @@
+{
+  "description": "SQL Server to PostgreSQL migration configuration for FamilyHub timesheet data",
+  "migration_id": "familyhub_timesheet_v1.0",
+  "created": "2025-08-29",
+  
+  "sqlserver": {
+    "server": "localhost\\SQLEXPRESS",
+    "database": "FamilyHubTimesheet",
+    "username": "sa",
+    "password": "your-password-here",
+    "trusted_connection": false,
+    "connection_timeout": 30
+  },
+  
+  "postgresql": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "familyhub",
+    "username": "familyhub_user",
+    "password": "your-postgres-password"
+  },
+  
+  "mapping": {
+    "Jobs": {
+      "model": "timesheet.Job",
+      "description": "Job definitions and hourly rates",
+      "fields": {
+        "JobId": "id",
+        "JobName": "name",
+        "JobDescription": "description",
+        "HourlyRate": "hourly_rate",
+        "ClientName": "client_name",
+        "IsActive": "is_active",
+        "CreatedDate": "created_at",
+        "UpdatedDate": "updated_at",
+        "CreatedBy": "created_by_id"
+      },
+      "transformations": {
+        "HourlyRate": {
+          "type": "decimal_to_float",
+          "precision": 2
+        },
+        "IsActive": {
+          "type": "bit_to_boolean"
+        }
+      }
+    },
+    
+    "TimeEntries": {
+      "model": "timesheet.TimeEntry",
+      "description": "Individual time tracking entries",
+      "fields": {
+        "EntryId": "id",
+        "JobId": "job_id",
+        "UserId": "user_id",
+        "EntryDate": "date",
+        "StartTime": "start_time",
+        "EndTime": "end_time",
+        "BreakMinutes": "break_duration",
+        "Notes": "notes",
+        "TotalHours": "total_hours",
+        "CreatedDate": "created_at",
+        "UpdatedDate": "updated_at",
+        "ApprovedBy": "approved_by_id",
+        "ApprovalDate": "approved_at"
+      },
+      "transformations": {
+        "BreakMinutes": {
+          "type": "minutes_to_choices",
+          "choices": [0, 15, 30, 45, 60]
+        },
+        "TotalHours": {
+          "type": "decimal_to_float",
+          "precision": 2
+        }
+      },
+      "dependencies": ["Jobs", "Users"]
+    },
+    
+    "Users": {
+      "model": "auth.User",
+      "description": "User accounts and profiles",
+      "fields": {
+        "UserId": "id",
+        "Username": "username",
+        "Email": "email",
+        "FirstName": "first_name",
+        "LastName": "last_name",
+        "IsActive": "is_active",
+        "CreatedDate": "date_joined",
+        "LastLogin": "last_login",
+        "PasswordHash": "password"
+      },
+      "transformations": {
+        "IsActive": {
+          "type": "bit_to_boolean"
+        },
+        "PasswordHash": {
+          "type": "sqlserver_hash_to_django",
+          "default": "pbkdf2_sha256$600000$temp$invalid"
+        }
+      }
+    },
+    
+    "Clients": {
+      "model": "timesheet.Client",
+      "description": "Client information for jobs",
+      "fields": {
+        "ClientId": "id",
+        "ClientName": "name",
+        "ContactEmail": "contact_email",
+        "ContactPhone": "contact_phone",
+        "Address": "address",
+        "IsActive": "is_active",
+        "CreatedDate": "created_at",
+        "UpdatedDate": "updated_at"
+      },
+      "transformations": {
+        "IsActive": {
+          "type": "bit_to_boolean"
+        }
+      }
+    }
+  },
+  
+  "migration_order": [
+    "Users",
+    "Clients", 
+    "Jobs",
+    "TimeEntries"
+  ],
+  
+  "validation_rules": {
+    "Jobs": {
+      "required_fields": ["name", "hourly_rate"],
+      "constraints": {
+        "hourly_rate": {
+          "min": 0,
+          "max": 1000
+        }
+      }
+    },
+    "TimeEntries": {
+      "required_fields": ["job_id", "user_id", "date", "start_time", "end_time"],
+      "constraints": {
+        "date": {
+          "min_date": "2020-01-01",
+          "max_date": "2030-12-31"
+        },
+        "total_hours": {
+          "min": 0,
+          "max": 24
+        }
+      }
+    }
+  },
+  
+  "migration_settings": {
+    "batch_size": 500,
+    "timeout_seconds": 300,
+    "retry_attempts": 3,
+    "skip_errors": false,
+    "verify_integrity": true,
+    "backup_before_import": true,
+    "log_level": "INFO"
+  },
+  
+  "post_migration_tasks": [
+    {
+      "name": "update_sequences",
+      "description": "Update PostgreSQL sequences to match imported data",
+      "command": "update_sequences"
+    },
+    {
+      "name": "rebuild_indexes",
+      "description": "Rebuild database indexes for optimal performance",
+      "command": "rebuild_indexes"
+    },
+    {
+      "name": "verify_foreign_keys",
+      "description": "Verify all foreign key relationships",
+      "command": "verify_foreign_keys"
+    }
+  ]
+}

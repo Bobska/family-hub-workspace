@@ -1,0 +1,17 @@
+# SQL Server Migration Dependencies
+
+# SQL Server ODBC driver and Python package
+pyodbc==5.0.1
+
+# Additional database utilities
+sqlparse==0.4.4
+
+# Data validation and comparison
+pandas==2.1.4
+numpy==1.24.4
+
+# JSON schema validation
+jsonschema==4.20.0
+
+# Progress bars for long operations
+tqdm==4.66.1

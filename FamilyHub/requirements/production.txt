@@ -1,4 +1,25 @@
 -r base.txt
+-r migration.txt
+
+# Production server
 gunicorn==23.0.0
+gevent==24.2.1
+
+# Database
 psycopg2-binary==2.9.10
+
+# Static files
 whitenoise==6.8.2
+
+# Cache and task queue
+redis==5.0.1
+django-redis==5.4.0
+celery==5.3.4
+django-celery-beat==2.6.0
+kombu==5.3.4
+
+# Monitoring and logging
+psutil==5.9.8
+
+# Performance
+hiredis==2.3.2

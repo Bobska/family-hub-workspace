@@ -1,0 +1,2 @@
+# Persistent data directory for Redis
+# This directory stores Redis snapshots and AOF files

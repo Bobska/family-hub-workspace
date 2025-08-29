@@ -1,0 +1,88 @@
+version: '3.8'
+
+# ⚡ Quick PostgreSQL Development Setup for FamilyHub
+# 🚀 Ready-to-use PostgreSQL 17.6 with pgAdmin in 5 minutes!
+
+services:
+  # PostgreSQL 17.6 Database
+  postgres-dev:
+    image: postgres:17.6-alpine
+    container_name: familyhub_postgres_dev_quick
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-familyhub}
+      POSTGRES_USER: ${POSTGRES_USER:-django}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secretpass}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_quick_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-django} -d ${POSTGRES_DB:-familyhub}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - familyhub_quick
+
+  # pgAdmin 4 Web Interface
+  pgadmin-dev:
+    image: dpage/pgadmin4:latest
+    container_name: familyhub_pgadmin_quick
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@familyhub.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_quick_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+    networks:
+      - familyhub_quick
+
+  # Redis (Optional - for caching and sessions)
+  redis-dev:
+    image: redis:7-alpine
+    container_name: familyhub_redis_dev_quick
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_quick_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - familyhub_quick
+    profiles:
+      - full
+
+# Docker Networks
+networks:
+  familyhub_quick:
+    driver: bridge
+    name: familyhub_quick_dev
+
+# Docker Volumes
+volumes:
+  postgres_quick_data:
+    driver: local
+    name: familyhub_postgres_quick_data
+  pgadmin_quick_data:
+    driver: local
+    name: familyhub_pgadmin_quick_data
+  redis_quick_data:
+    driver: local
+    name: familyhub_redis_quick_data

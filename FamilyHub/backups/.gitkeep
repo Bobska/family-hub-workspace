@@ -1,0 +1,7 @@
+# Backup directory for PostgreSQL dumps
+# Files in this directory will be automatically compressed and rotated
+
+*.sql
+*.sql.gz
+*.dump
+*.backup

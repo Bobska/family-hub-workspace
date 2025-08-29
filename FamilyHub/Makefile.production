@@ -1,0 +1,180 @@
+# FamilyHub Production Docker Management Makefile
+
+.PHONY: help build up down restart logs shell migrate collectstatic backup restore health
+
+# Default environment file
+ENV_FILE ?= .env.production
+
+# Docker Compose files
+COMPOSE_FILES = -f docker-compose.yml -f docker-compose.production.yml
+
+help: ## Show this help message
+	@echo "FamilyHub Production Docker Commands"
+	@echo "===================================="
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+build: ## Build all Docker images
+	@echo "🏗️  Building production images..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) build --no-cache
+
+up: ## Start all services in production mode
+	@echo "🚀 Starting FamilyHub production stack..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) up -d
+	@echo "✅ Production stack started!"
+	@echo "🌐 Web: https://localhost"
+	@echo "📊 Redis Commander: http://localhost:8082 (with monitoring profile)"
+
+down: ## Stop all services
+	@echo "🛑 Stopping FamilyHub production stack..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) down
+	@echo "✅ All services stopped"
+
+stop: ## Stop services without removing containers
+	@echo "⏸️  Stopping services..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) stop
+
+start: ## Start existing containers
+	@echo "▶️  Starting services..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) start
+
+restart: ## Restart all services
+	@echo "🔄 Restarting production stack..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) restart
+	@echo "✅ Services restarted"
+
+logs: ## Show logs from all services
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) logs -f
+
+logs-web: ## Show Django web logs
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) logs -f web
+
+logs-nginx: ## Show Nginx logs
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) logs -f nginx
+
+logs-postgres: ## Show PostgreSQL logs
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) logs -f postgres
+
+logs-redis: ## Show Redis logs
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) logs -f redis
+
+logs-celery: ## Show Celery worker logs
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) logs -f celery
+
+logs-backup: ## Show backup service logs
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) logs -f backup
+
+shell: ## Access Django shell
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec web python manage.py shell
+
+bash: ## Access web container bash
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec web bash
+
+psql: ## Access PostgreSQL shell
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec postgres psql -U familyhub_user -d familyhub
+
+redis-cli: ## Access Redis CLI
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec redis redis-cli
+
+migrate: ## Run Django migrations
+	@echo "🔄 Running database migrations..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec web python manage.py migrate
+	@echo "✅ Migrations completed"
+
+makemigrations: ## Create Django migrations
+	@echo "📝 Creating migrations..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec web python manage.py makemigrations
+	@echo "✅ Migrations created"
+
+collectstatic: ## Collect static files
+	@echo "📦 Collecting static files..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec web python manage.py collectstatic --noinput
+	@echo "✅ Static files collected"
+
+createsuperuser: ## Create Django superuser
+	@echo "👤 Creating superuser..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec web python manage.py createsuperuser
+
+health: ## Check health of all services
+	@echo "🏥 Checking service health..."
+	@echo "Web Service:"
+	@curl -f http://localhost/health/ 2>/dev/null && echo "✅ Web: Healthy" || echo "❌ Web: Unhealthy"
+	@echo "Database Service:"
+	@docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec postgres pg_isready -U familyhub_user -d familyhub >/dev/null 2>&1 && echo "✅ Database: Healthy" || echo "❌ Database: Unhealthy"
+	@echo "Redis Service:"
+	@docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec redis redis-cli ping >/dev/null 2>&1 && echo "✅ Redis: Healthy" || echo "❌ Redis: Unhealthy"
+	@echo "Celery Worker:"
+	@docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec celery celery -A FamilyHub inspect ping >/dev/null 2>&1 && echo "✅ Celery: Healthy" || echo "❌ Celery: Unhealthy"
+
+ps: ## Show running containers
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) ps
+
+stats: ## Show container resource usage
+	docker stats $$(docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) ps -q)
+
+backup: ## Create database backup
+	@echo "💾 Creating database backup..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec backup /backup.sh
+	@echo "✅ Backup completed"
+
+backup-now: ## Force immediate backup
+	@echo "💾 Creating immediate backup..."
+	@TIMESTAMP=$$(date +%Y%m%d_%H%M%S) && \
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec postgres pg_dump -U familyhub_user -d familyhub > ./backups/familyhub_backup_$$TIMESTAMP.sql
+	@echo "✅ Backup saved to ./backups/"
+
+restore: ## Restore from backup (requires BACKUP_FILE variable)
+ifndef BACKUP_FILE
+	@echo "❌ Please specify BACKUP_FILE=path/to/backup.sql"
+	@exit 1
+endif
+	@echo "🔄 Restoring from backup: $(BACKUP_FILE)"
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec -T postgres psql -U familyhub_user -d familyhub < $(BACKUP_FILE)
+	@echo "✅ Restore completed"
+
+clean: ## Remove all containers, volumes, and images
+	@echo "🧹 Cleaning up Docker resources..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) down -v --rmi all
+	docker system prune -f
+	@echo "✅ Cleanup completed"
+
+reset: ## Reset entire environment (DANGEROUS - removes all data)
+	@echo "⚠️  WARNING: This will remove ALL data!"
+	@read -p "Are you sure? Type 'yes' to continue: " confirm && [ "$$confirm" = "yes" ] || exit 1
+	@echo "🔄 Resetting environment..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) down -v
+	docker volume prune -f
+	rm -rf ./data/postgres/* ./data/redis/*
+	@echo "✅ Environment reset completed"
+
+update: ## Update and restart services
+	@echo "🔄 Updating production stack..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) pull
+	$(MAKE) build
+	$(MAKE) down
+	$(MAKE) up
+	@echo "✅ Update completed"
+
+monitoring: ## Start with monitoring services
+	@echo "📊 Starting with monitoring..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) --profile monitoring up -d
+
+# Development helpers
+dev-setup: ## Setup development environment
+	@echo "🛠️  Setting up development environment..."
+	cp .env.production .env
+	@echo "✅ Please edit .env file with your settings"
+
+dev-test: ## Run tests in container
+	@echo "🧪 Running tests..."
+	docker-compose $(COMPOSE_FILES) --env-file $(ENV_FILE) exec web python manage.py test
+
+# Security
+security-scan: ## Run security scan on images
+	@echo "🔒 Running security scan..."
+	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(PWD):/src aquasec/trivy fs /src
+
+# Documentation
+docs: ## Generate documentation
+	@echo "📖 Available commands:"
+	@$(MAKE) help

@@ -1,0 +1,55 @@
+version: '3.8'
+
+# Development-specific Docker Compose configuration
+# Extends the base docker-compose.yml with development settings
+
+services:
+  # Development Web Service
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DATABASE_URL=postgresql://familyhub_user:${POSTGRES_PASSWORD:-changeme123}@postgres:5432/familyhub
+      - REDIS_URL=redis://redis:6379/0
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,host.docker.internal
+      - DJANGO_SETTINGS_MODULE=FamilyHub.settings.development
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "wait-for-it.sh postgres:5432 --timeout=60 --strict -- 
+             python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    stdin_open: true
+    tty: true
+
+  # Development-specific services
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: familyhub_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+  # File watcher for hot reload (optional)
+  webpack:
+    build:
+      context: .
+      dockerfile: Dockerfile.webpack
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run watch
+    depends_on:
+      - web
+    profiles:
+      - frontend
