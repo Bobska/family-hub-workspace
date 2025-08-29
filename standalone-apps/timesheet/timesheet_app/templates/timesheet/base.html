@@ -107,6 +107,23 @@
             color: #1e2125;
             background-color: #e9ecef;
         }
+        
+        /* Environment indicator */
+        .env-badge {
+            font-size: 0.75rem;
+            border-radius: 15px;
+            padding: 0.25rem 0.75rem;
+            margin-left: 0.5rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .env-info {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-left: 0.5rem;
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -118,6 +135,16 @@
             <a class="navbar-brand" href="{% url 'timesheet:dashboard' %}">
                 <i class="fas fa-clock me-2"></i>Timesheet
             </a>
+            
+            <!-- Environment Indicator -->
+            {% if environment_info %}
+            <span class="badge bg-{{ environment_info.mode_class }} env-badge">
+                {{ environment_info.mode_icon }} {{ environment_info.mode }}
+            </span>
+            <span class="text-muted env-info d-none d-md-inline">
+                {{ environment_info.server_type }} | {{ environment_info.database }} | {{ environment_info.server_url }}
+            </span>
+            {% endif %}
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
