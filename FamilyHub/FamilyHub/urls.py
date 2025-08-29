@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from .health_views import health_check
+# Temporarily commented out for basic testing
+# from .health_views import health_check
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -11,7 +12,8 @@ urlpatterns = [
     path('timesheet/', include('timesheet.urls')),  # Shared timesheet app
     
     # Health check endpoints
-    path('health/', health_check, name='health_check'),
+    # Temporarily commented out for basic testing
+    # path('health/', health_check, name='health_check'),
 ]
 
 if settings.DEBUG:

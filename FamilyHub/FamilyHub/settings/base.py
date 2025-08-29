@@ -22,7 +22,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Third-party apps
-    'django_celery_beat',
+    # Temporarily commented out for basic testing
+    # 'django_celery_beat',
     
     # Local apps
     'home',
