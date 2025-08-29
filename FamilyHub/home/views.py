@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.conf import settings
 from datetime import datetime
 import subprocess
 import socket
@@ -11,11 +12,15 @@ def check_port_status(host, port):
     except (socket.timeout, socket.error):
         return False
 
+def is_docker_environment():
+    """Check if running in Docker environment"""
+    return 'settings_docker' in settings.SETTINGS_MODULE
+
 def get_environment_status():
     """Get development environment status"""
     services = {
         'familyhub': check_port_status('127.0.0.1', 8000),
-        'timesheet_app': check_port_status('127.0.0.1', 8001),
+        'timesheet_app': check_port_status('127.0.0.1', 8001) if not is_docker_environment() else False,
         'postgresql': check_port_status('127.0.0.1', 5432),
         'redis': check_port_status('127.0.0.1', 6379),
         'pgadmin': check_port_status('127.0.0.1', 5050)
@@ -44,8 +49,11 @@ def home_dashboard(request):
     env_status = get_environment_status()
     
     # Prepare app cards with their information
-    apps = [
-        {
+    apps = []
+    
+    # Only show timesheet in non-Docker environments
+    if not is_docker_environment():
+        apps.append({
             'name': 'Timesheet Tracker',
             'icon': '⏰',
             'description': 'Track work hours, jobs, and calculate pay',
@@ -60,7 +68,10 @@ def home_dashboard(request):
                 'Pay rate calculations',
                 'Daily summaries'
             ]
-        },
+        })
+    
+    # Add other apps that are available in all environments
+    apps.extend([
         {
             'name': 'Daycare Invoice Tracker',
             'icon': '🧸',
@@ -136,7 +147,7 @@ def home_dashboard(request):
                 'Financial reports'
             ]
         }
-    ]
+    ])
     
     # Development info for status display
     development_info = {

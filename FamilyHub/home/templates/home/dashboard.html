@@ -183,101 +183,49 @@
 
         <!-- Apps Grid -->
         <div class="row apps-grid g-4">
-            <!-- Timesheet App -->
+            {% for app in apps %}
+            <!-- {{ app.name }} App -->
             <div class="col-lg-4 col-md-6">
                 <div class="card app-card h-100">
                     <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">⏰</div>
-                        <h5 class="card-title">Timesheet</h5>
-                        <p class="card-description">Track work hours, manage jobs, and calculate earnings with detailed time entry logging.</p>
+                        <div class="card-icon">{{ app.icon }}</div>
+                        <h5 class="card-title">{{ app.name }}</h5>
+                        <p class="card-description">{{ app.description }}</p>
                         <div class="mt-auto">
-                            <a href="/timesheet/" class="btn btn-primary btn-app">
-                                <i class="bi bi-clock me-2"></i>Track Hours
-                            </a>
+                            {% if app.status == 'running' %}
+                                <a href="{{ app.url }}" class="btn btn-{{ app.color }} btn-app">
+                                    <i class="bi bi-play-circle me-2"></i>Open App
+                                </a>
+                                <div class="mt-2">
+                                    <span class="badge bg-success">✅ Running</span>
+                                </div>
+                            {% elif app.status == 'stopped' %}
+                                <button class="btn btn-{{ app.color }} btn-app" disabled>
+                                    <i class="bi bi-pause-circle me-2"></i>{{ app.name }}
+                                </button>
+                                <div class="mt-2">
+                                    <span class="badge bg-warning">⏸️ Available on demand</span>
+                                </div>
+                            {% elif app.status == 'development' %}
+                                <button class="btn btn-{{ app.color }} btn-app" disabled>
+                                    <i class="bi bi-tools me-2"></i>In Development
+                                </button>
+                                <div class="mt-2">
+                                    <span class="badge bg-info">🔧 Development</span>
+                                </div>
+                            {% else %}
+                                <button class="btn btn-{{ app.color }} btn-app" disabled>
+                                    <i class="bi bi-clock me-2"></i>Planned
+                                </button>
+                                <div class="mt-2">
+                                    <span class="badge bg-secondary">� Planned</span>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Household Budget App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">💰</div>
-                        <h5 class="card-title">Household Budget</h5>
-                        <p class="card-description">Manage family finances, track expenses, and monitor your budget goals effectively.</p>
-                        <div class="mt-auto">
-                            <a href="/budget/" class="btn btn-success btn-app">
-                                <i class="bi bi-piggy-bank me-2"></i>Manage Budget
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Daycare Invoices App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">🧒</div>
-                        <h5 class="card-title">Daycare Invoices</h5>
-                        <p class="card-description">Track daycare bills, payment schedules, and maintain records of childcare expenses.</p>
-                        <div class="mt-auto">
-                            <a href="/daycare/" class="btn btn-info btn-app">
-                                <i class="bi bi-receipt me-2"></i>View Invoices
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Employment History App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">💼</div>
-                        <h5 class="card-title">Employment History</h5>
-                        <p class="card-description">Maintain comprehensive career records, job history, and professional achievements.</p>
-                        <div class="mt-auto">
-                            <a href="/employment/" class="btn btn-warning btn-app">
-                                <i class="bi bi-briefcase me-2"></i>Career Records
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upcoming Payments App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">📅</div>
-                        <h5 class="card-title">Upcoming Payments</h5>
-                        <p class="card-description">Never miss payment deadlines with organized tracking of bills and financial obligations.</p>
-                        <div class="mt-auto">
-                            <a href="/payments/" class="btn btn-danger btn-app">
-                                <i class="bi bi-calendar-check me-2"></i>View Payments
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Credit Cards App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">💳</div>
-                        <h5 class="card-title">Credit Cards</h5>
-                        <p class="card-description">Manage credit card accounts, track balances, and monitor payment schedules securely.</p>
-                        <div class="mt-auto">
-                            <a href="/creditcards/" class="btn btn-secondary btn-app">
-                                <i class="bi bi-credit-card me-2"></i>Manage Cards
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
