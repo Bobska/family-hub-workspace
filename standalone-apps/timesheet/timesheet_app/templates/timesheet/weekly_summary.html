@@ -76,12 +76,12 @@
     
     /* Enhanced weekend styling */
     .weekend-card .card-header {
-        background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+        background-color: #6c757d !important;
     }
     
     /* Enhanced weekday styling */
     .weekday-card .card-header {
-        background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
+        background-color: #0d6efd !important;
     }
     
     /* Today highlighting */
@@ -91,7 +91,8 @@
     }
     
     .bg-warning.card-header {
-        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+        background-color: #ffc107 !important;
+        color: #000 !important;
         font-weight: bold;
     }
     
@@ -141,9 +142,14 @@
                 <a href="{% url 'timesheet:dashboard' %}" class="btn btn-outline-secondary me-2">
                     <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                 </a>
-                <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-outline-primary">
+                <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-outline-primary me-2">
                     <i class="fas fa-calendar-day me-1"></i>Daily Entry
                 </a>
+                {% if not has_jobs %}
+                    <a href="{% url 'timesheet:job_create' %}" class="btn btn-warning">
+                        <i class="fas fa-plus me-1"></i>Add Job
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -152,36 +158,38 @@
 <!-- Week Navigation -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="week-nav">
-            <div class="row align-items-center">
-                <div class="col-md-3">
-                    <a href="{% url 'timesheet:weekly_summary' %}?year={{ prev_year }}&week={{ prev_week }}" 
-                       class="btn btn-outline-primary">
-                        <i class="fas fa-chevron-left me-1"></i>Previous Week
-                    </a>
-                </div>
-                <div class="col-md-6 text-center">
-                    <h5 class="mb-0">
-                        {{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}
-                    </h5>
-                    <small class="text-muted">
-                        Week {{ current_week }}, {{ current_year }} | 
-                        Total: {{ weekly_total|floatformat:2 }} hours |
-                        Days worked: {{ days_worked }} | 
-                        Entries: {{ total_entries }}
-                    </small>
-                </div>
-                <div class="col-md-3 text-end">
-                    {% if show_next %}
-                        <a href="{% url 'timesheet:weekly_summary' %}?year={{ next_year }}&week={{ next_week }}" 
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <a href="{% url 'timesheet:weekly_summary' %}?year={{ prev_year }}&week={{ prev_week }}" 
                            class="btn btn-outline-primary">
-                            Next Week<i class="fas fa-chevron-right ms-1"></i>
+                            <i class="fas fa-chevron-left me-1"></i>Previous Week
                         </a>
-                    {% else %}
-                        <button class="btn btn-outline-secondary" disabled>
-                            Next Week<i class="fas fa-chevron-right ms-1"></i>
-                        </button>
-                    {% endif %}
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h5 class="mb-0">
+                            {{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}
+                        </h5>
+                        <small class="text-muted">
+                            Week {{ current_week }}, {{ current_year }} | 
+                            Total: {{ weekly_total|floatformat:2 }} hours |
+                            Days worked: {{ days_worked }} | 
+                            Entries: {{ total_entries }}
+                        </small>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        {% if show_next %}
+                            <a href="{% url 'timesheet:weekly_summary' %}?year={{ next_year }}&week={{ next_week }}" 
+                               class="btn btn-outline-primary">
+                                Next Week<i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        {% else %}
+                            <button class="btn btn-outline-secondary" disabled>
+                                Next Week<i class="fas fa-chevron-right ms-1"></i>
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
