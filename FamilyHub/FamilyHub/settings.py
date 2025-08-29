@@ -10,10 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Add shared apps to Python path for dual deployment
+sys.path.insert(0, str(BASE_DIR.parent / 'shared' / 'apps'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,8 +45,10 @@ INSTALLED_APPS = [
     # Core FamilyHub apps
     'home',
     
-    # Standalone apps - will be uncommented as they are developed
-    # 'apps.timesheet_app',
+    # Shared integrated apps
+    'timesheet',  # Shared timesheet app from shared/apps/timesheet/
+    
+    # Future standalone apps - will be uncommented as they are developed
     # 'apps.daycare_invoice_app',
     # 'apps.employment_history_app',
     # 'apps.upcoming_payments_app',
@@ -135,3 +141,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Deployment context flag for dual deployment strategy
+IS_STANDALONE = False
