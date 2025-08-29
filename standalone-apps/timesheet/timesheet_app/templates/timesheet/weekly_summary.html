@@ -3,40 +3,73 @@
 {% block extra_css %}
 <style>
     .day-card {
-        min-height: 200px;
+        min-height: 250px;
         display: flex;
         flex-direction: column;
     }
     .day-card .card-body {
         flex-grow: 1;
         overflow-y: auto;
-        max-height: 150px;
+        max-height: 200px;
     }
-    /* Highlight weekends */
+    
+    /* Enhanced styling for weekdays vs weekends */
     .weekend-card {
         background-color: #f8f9fa;
-        border: 2px solid #dee2e6;
+        border: 2px solid #6c757d;
     }
     .weekday-card {
         background-color: #ffffff;
         border: 2px solid #0d6efd;
     }
     
-    /* Ensure equal width and proper spacing for day columns */
+    /* Better spacing for the two-row layout */
     .day-column {
-        flex: 1;
-        min-width: 0; /* Allow flex items to shrink */
         margin-bottom: 1rem;
     }
     
-    /* Add responsive spacing */
-    @media (max-width: 768px) {
+    /* Ensure equal height cards in each row */
+    .row .day-column .day-card {
+        height: 100%;
+    }
+    
+    /* Section headers for weekdays/weekend */
+    .row h5 {
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 0.5rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
         .day-column {
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
         .day-card {
-            min-height: 150px;
+            min-height: 200px;
         }
+    }
+    
+    @media (max-width: 768px) {
+        .day-column {
+            margin-bottom: 0.75rem;
+        }
+        .day-card {
+            min-height: 180px;
+        }
+        .day-card .card-body {
+            max-height: 150px;
+        }
+    }
+    
+    /* Enhanced weekend styling */
+    .weekend-card .card-header {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+    }
+    
+    /* Enhanced weekday styling */
+    .weekday-card .card-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
     }
     
     /* Print styles */
@@ -48,6 +81,7 @@
         .card {
             border: 1px solid #000;
             box-shadow: none;
+            break-inside: avoid;
         }
         
         .day-header.today {
@@ -58,6 +92,10 @@
         .entry-item {
             border: 1px solid #ccc;
             margin-bottom: 0.25rem;
+        }
+        
+        .row {
+            break-inside: avoid;
         }
     }
 </style>
@@ -168,62 +206,137 @@
 </div>
 
 <!-- Daily Breakdown -->
-<div class="row g-2">
+<!-- Weekdays (Monday - Friday) -->
+<div class="row mb-3">
+    <div class="col-12">
+        <h5 class="mb-3">
+            <i class="fas fa-briefcase me-2 text-primary"></i>Weekdays
+        </h5>
+    </div>
     {% for day in week_data %}
-        <div class="col-lg day-column">
-            <div class="card day-card h-100 {% if day.weekday >= 5 %}weekend-card{% else %}weekday-card{% endif %}">
-                <div class="card-header {% if day.weekday >= 5 %}bg-secondary text-white{% else %}bg-primary text-white{% endif %}">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>
-                            <strong>{{ day.day_name }}</strong>
-                            <br><small>{{ day.date|date:"d/m" }}</small>
-                        </span>
-                        <span class="badge bg-light text-dark">
-                            {{ day.total|floatformat:2 }}h
-                        </span>
+        {% if day.weekday < 5 %}
+            <div class="col-lg day-column">
+                <div class="card day-card h-100 weekday-card">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong>{{ day.day_name }}</strong>
+                                <br><small>{{ day.date|date:"d/m" }}</small>
+                            </span>
+                            <span class="badge bg-light text-dark">
+                                {{ day.total|floatformat:2 }}h
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    {% if day.entries %}
-                        {% for entry in day.entries %}
-                            <div class="entry-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <strong>{{ entry.job.display_name }}</strong>
-                                        <br><small class="text-muted">
-                                            {{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}
-                                            {% if entry.break_duration > 0 %}
-                                                ({{ entry.get_break_duration_display }})
-                                            {% endif %}
-                                        </small>
-                                    </div>
-                                    <div class="text-end">
-                                        <small class="total-hours">{{ entry.total_hours|floatformat:2 }}h</small>
-                                        <br>
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{% url 'timesheet:entry_edit' entry.pk %}" 
-                                               class="btn btn-outline-primary btn-sm" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                    <div class="card-body">
+                        {% if day.entries %}
+                            {% for entry in day.entries %}
+                                <div class="entry-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>{{ entry.job.display_name }}</strong>
+                                            <br><small class="text-muted">
+                                                {{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}
+                                                {% if entry.break_duration > 0 %}
+                                                    ({{ entry.get_break_duration_display }})
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="total-hours">{{ entry.total_hours|floatformat:2 }}h</small>
+                                            <br>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'timesheet:entry_edit' entry.pk %}" 
+                                                   class="btn btn-outline-primary btn-sm" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                <br><small>No entries</small>
+                                <br>
+                                <a href="{% url 'timesheet:daily_entry' %}?date={{ day.date|date:'Y-m-d' }}" 
+                                   class="btn btn-outline-primary btn-sm mt-2">
+                                    <i class="fas fa-plus me-1"></i>Add Entry
+                                </a>
                             </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center text-muted py-3">
-                            <i class="fas fa-calendar-times fa-2x mb-2"></i>
-                            <br><small>No entries</small>
-                            <br>
-                            <a href="{% url 'timesheet:daily_entry' %}?date={{ day.date|date:'Y-m-d' }}" 
-                               class="btn btn-outline-primary btn-sm mt-2">
-                                <i class="fas fa-plus me-1"></i>Add Entry
-                            </a>
-                        </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- Weekend (Saturday - Sunday) -->
+<div class="row">
+    <div class="col-12">
+        <h5 class="mb-3">
+            <i class="fas fa-home me-2 text-secondary"></i>Weekend
+        </h5>
+    </div>
+    {% for day in week_data %}
+        {% if day.weekday >= 5 %}
+            <div class="col-md-6 day-column">
+                <div class="card day-card h-100 weekend-card">
+                    <div class="card-header bg-secondary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong>{{ day.day_name }}</strong>
+                                <br><small>{{ day.date|date:"d/m" }}</small>
+                            </span>
+                            <span class="badge bg-light text-dark">
+                                {{ day.total|floatformat:2 }}h
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if day.entries %}
+                            {% for entry in day.entries %}
+                                <div class="entry-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>{{ entry.job.display_name }}</strong>
+                                            <br><small class="text-muted">
+                                                {{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}
+                                                {% if entry.break_duration > 0 %}
+                                                    ({{ entry.get_break_duration_display }})
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="total-hours">{{ entry.total_hours|floatformat:2 }}h</small>
+                                            <br>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'timesheet:entry_edit' entry.pk %}" 
+                                                   class="btn btn-outline-primary btn-sm" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                <br><small>No entries</small>
+                                <br>
+                                <a href="{% url 'timesheet:daily_entry' %}?date={{ day.date|date:'Y-m-d' }}" 
+                                   class="btn btn-outline-primary btn-sm mt-2">
+                                    <i class="fas fa-plus me-1"></i>Add Entry
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     {% endfor %}
 </div>
 
