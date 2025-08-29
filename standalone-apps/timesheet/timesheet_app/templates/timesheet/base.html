@@ -100,6 +100,21 @@
             border-radius: 0.25rem;
             border-left: 3px solid var(--primary);
         }
+        
+        /* Logout button styling to match dropdown items */
+        .dropdown-item.logout-btn {
+            color: #212529;
+            text-decoration: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .dropdown-item.logout-btn:hover,
+        .dropdown-item.logout-btn:focus {
+            color: #1e2125;
+            background-color: #e9ecef;
+        }
     </style>
     
     {% block extra_css %}{% endblock %}
@@ -157,7 +172,14 @@
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item logout-btn border-0 bg-transparent">
+                                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
                         </ul>
                     </li>
                 </ul>
