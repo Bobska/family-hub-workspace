@@ -95,38 +95,87 @@ function Start-Both {
 }
 
 function Show-Status {
-    Write-ColorOutput "Server Status Report" "Cyan"
-    Write-ColorOutput "====================" "Cyan"
+    Write-ColorOutput "🔍 Development Environment Status" "Cyan"
+    Write-ColorOutput "=================================" "Cyan"
     Write-Host ""
     
     # Check if servers are running by testing ports
     try {
         $familyHubTest = Test-NetConnection -ComputerName "127.0.0.1" -Port 8000 -WarningAction SilentlyContinue
         $timesheetTest = Test-NetConnection -ComputerName "127.0.0.1" -Port 8001 -WarningAction SilentlyContinue
+        $postgresTest = Test-NetConnection -ComputerName "127.0.0.1" -Port 5432 -WarningAction SilentlyContinue
+        $redisTest = Test-NetConnection -ComputerName "127.0.0.1" -Port 6379 -WarningAction SilentlyContinue
         
-        Write-ColorOutput "Server Status:" "Yellow"
+        Write-ColorOutput "🚀 Django Applications:" "Yellow"
         if ($familyHubTest.TcpTestSucceeded) {
-            Write-ColorOutput "  [RUNNING] FamilyHub (8000): Active" "Green"
-            Write-ColorOutput "     URL: http://127.0.0.1:8000/" "White"
+            Write-ColorOutput "  ✅ FamilyHub (8000): Running" "Green"
+            Write-ColorOutput "     📍 http://127.0.0.1:8000/" "White"
         } else {
-            Write-ColorOutput "  [STOPPED] FamilyHub (8000): Inactive" "Red"
+            Write-ColorOutput "  ❌ FamilyHub (8000): Stopped" "Red"
         }
         
         if ($timesheetTest.TcpTestSucceeded) {
-            Write-ColorOutput "  [RUNNING] Timesheet (8001): Active" "Green"
-            Write-ColorOutput "     URL: http://127.0.0.1:8001/" "White"
+            Write-ColorOutput "  ✅ Timesheet (8001): Running" "Green"
+            Write-ColorOutput "     📍 http://127.0.0.1:8001/" "White"
         } else {
-            Write-ColorOutput "  [STOPPED] Timesheet (8001): Inactive" "Red"
+            Write-ColorOutput "  ❌ Timesheet (8001): Stopped" "Red"
         }
+        
+        Write-Host ""
+        Write-ColorOutput "🗄️ Database Services:" "Yellow"
+        if ($postgresTest.TcpTestSucceeded) {
+            Write-ColorOutput "  ✅ PostgreSQL (5432): Running" "Green"
+        } else {
+            Write-ColorOutput "  ❌ PostgreSQL (5432): Stopped" "Red"
+        }
+        
+        if ($redisTest.TcpTestSucceeded) {
+            Write-ColorOutput "  ✅ Redis (6379): Running" "Green"
+        } else {
+            Write-ColorOutput "  ❌ Redis (6379): Stopped" "Red"
+        }
+        
+        # Check pgAdmin
+        Write-Host ""
+        Write-ColorOutput "🌐 Web Interfaces:" "Yellow"
+        try {
+            $pgAdminResponse = Invoke-WebRequest -Uri "http://localhost:5050" -TimeoutSec 3 -UseBasicParsing
+            Write-ColorOutput "  ✅ pgAdmin (5050): Running" "Green"
+            Write-ColorOutput "     📍 http://localhost:5050/" "White"
+        }
+        catch {
+            Write-ColorOutput "  ❌ pgAdmin (5050): Not accessible" "Red"
+        }
+        
     }
     catch {
         Write-ColorOutput "Could not check server status" "Yellow"
     }
     
+    # Docker status
     Write-Host ""
-    Write-ColorOutput "Quick Start Commands:" "Yellow"
+    Write-ColorOutput "🐳 Docker Status:" "Yellow"
+    try {
+        $dockerContainers = docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | Where-Object { $_ -match "familyhub|postgres|redis|pgadmin" }
+        if ($dockerContainers) {
+            $dockerContainers | ForEach-Object { Write-ColorOutput "  $_" "White" }
+        } else {
+            Write-ColorOutput "  ℹ️ No FamilyHub containers running" "Yellow"
+        }
+    }
+    catch {
+        Write-ColorOutput "  ❌ Docker not available" "Red"
+    }
+    
+    Write-Host ""
+    Write-ColorOutput "🛠️ Quick Commands:" "Green"
     Write-Host "  .\scripts\quick.ps1 familyhub    # Start FamilyHub"
     Write-Host "  .\scripts\quick.ps1 timesheet    # Start Timesheet"
+    Write-Host "  .\weekend-setup.ps1              # Complete environment setup"
+    if (Get-Command make -ErrorAction SilentlyContinue) {
+        Write-Host "  make dev                         # Start Docker environment"
+        Write-Host "  make quick                       # Start PostgreSQL only"
+    }
 }
 
 function Show-Docker {
