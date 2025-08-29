@@ -72,6 +72,17 @@
         background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
     }
     
+    /* Today highlighting */
+    .border-warning {
+        border-width: 3px !important;
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+    }
+    
+    .bg-warning.card-header {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+        font-weight: bold;
+    }
+    
     /* Print styles */
     @media print {
         .btn, .navbar, footer, .card-title {
@@ -216,14 +227,14 @@
     {% for day in week_data %}
         {% if day.weekday < 5 %}
             <div class="col-lg day-column">
-                <div class="card day-card h-100 weekday-card">
-                    <div class="card-header bg-primary text-white">
+                <div class="card day-card h-100 weekday-card {% if day.is_today %}border-warning{% endif %}">
+                    <div class="card-header {% if day.is_today %}bg-warning text-dark{% else %}bg-primary text-white{% endif %}">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>
-                                <strong>{{ day.day_name }}</strong>
+                                <strong>{{ day.day_name }}{% if day.is_today %} (Today){% endif %}</strong>
                                 <br><small>{{ day.date|date:"d/m" }}</small>
                             </span>
-                            <span class="badge bg-light text-dark">
+                            <span class="badge {% if day.is_today %}bg-dark{% else %}bg-light{% endif %} {% if day.is_today %}text-white{% else %}text-dark{% endif %}">
                                 {{ day.total|floatformat:2 }}h
                             </span>
                         </div>
@@ -283,14 +294,14 @@
     {% for day in week_data %}
         {% if day.weekday >= 5 %}
             <div class="col-md-6 day-column">
-                <div class="card day-card h-100 weekend-card">
-                    <div class="card-header bg-secondary text-white">
+                <div class="card day-card h-100 weekend-card {% if day.is_today %}border-warning{% endif %}">
+                    <div class="card-header {% if day.is_today %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %}">
                         <div class="d-flex justify-content-between align-items-center">
                             <span>
-                                <strong>{{ day.day_name }}</strong>
+                                <strong>{{ day.day_name }}{% if day.is_today %} (Today){% endif %}</strong>
                                 <br><small>{{ day.date|date:"d/m" }}</small>
                             </span>
-                            <span class="badge bg-light text-dark">
+                            <span class="badge {% if day.is_today %}bg-dark{% else %}bg-light{% endif %} {% if day.is_today %}text-white{% else %}text-dark{% endif %}">
                                 {{ day.total|floatformat:2 }}h
                             </span>
                         </div>
