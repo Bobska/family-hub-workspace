@@ -100,9 +100,9 @@
                 <h5 class="card-title mb-0">
                     <i class="fas fa-calendar-day me-2"></i>Today's Time Entries
                 </h5>
-                <div class="alert alert-primary mb-0 py-2 px-3">
-                    <strong class="text-primary-emphasis">Total: {{ today_total|floatformat:2 }} hours</strong>
-                </div>
+                <span class="badge bg-primary fs-6">
+                    Total: {{ today_total|floatformat:2 }} hours
+                </span>
             </div>
             <div class="card-body">
                 {% if today_entries %}

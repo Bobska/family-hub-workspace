@@ -11,7 +11,7 @@
                 <h1 class="h2">
                     <i class="fas fa-calendar-day me-2 text-primary"></i>Daily Entry
                 </h1>
-                <p class="text-muted">{{ selected_date|date:"F d, Y" }} ({{ selected_date|date:"l" }})</p>
+                <p class="text-muted">{{ formatted_date }} ({{ day_name }})</p>
             </div>
             <div>
                 <a href="{% url 'timesheet:dashboard' %}" class="btn btn-outline-secondary me-2">
@@ -50,10 +50,14 @@
                         </form>
                     </div>
                     <div class="col-md-3 text-end">
-                        <a href="{% url 'timesheet:daily_entry' %}?date={{ next_date|date:'Y-m-d' }}" 
-                           class="btn btn-outline-primary">
-                            Next Day<i class="fas fa-chevron-right ms-1"></i>
-                        </a>
+                        {% if next_date %}
+                            <a href="{% url 'timesheet:daily_entry' %}?date={{ next_date|date:'Y-m-d' }}" 
+                               class="btn btn-outline-primary">
+                                Next Day<i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Today</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -145,9 +149,9 @@
                 <h5 class="card-title mb-0">
                     <i class="fas fa-list me-2"></i>Time Entries for {{ selected_date|date:"M d, Y" }}
                 </h5>
-                <div class="alert alert-primary mb-0 py-2 px-3">
-                    <strong class="text-primary-emphasis">Total: {{ daily_total|floatformat:2 }} hours</strong>
-                </div>
+                <span class="badge bg-primary fs-6">
+                    Total: {{ daily_total|floatformat:2 }} hours
+                </span>
             </div>
             <div class="card-body">
                 {% if entries %}

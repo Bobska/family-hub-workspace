@@ -21,6 +21,28 @@
         background-color: #ffffff;
         border: 2px solid #0d6efd;
     }
+    
+    /* Print styles */
+    @media print {
+        .btn, .navbar, footer, .card-title {
+            display: none;
+        }
+        
+        .card {
+            border: 1px solid #000;
+            box-shadow: none;
+        }
+        
+        .day-header.today {
+            background-color: #000 !important;
+            color: white !important;
+        }
+        
+        .entry-item {
+            border: 1px solid #ccc;
+            margin-bottom: 0.25rem;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -230,29 +252,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    @media print {
-        .btn, .navbar, footer, .card-title {
-            display: none;
-        }
-        
-        .card {
-            border: 1px solid #000;
-            box-shadow: none;
-        }
-        
-        .day-header.today {
-            background-color: #000 !important;
-            color: white !important;
-        }
-        
-        .entry-item {
-            border: 1px solid #ccc;
-            margin-bottom: 0.25rem;
-        }
-    }
-</style>
 {% endblock %}

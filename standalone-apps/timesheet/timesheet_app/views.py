@@ -44,8 +44,20 @@ def dashboard(request):
                 messages.success(request, 'Time entry added successfully!')
                 return redirect('timesheet:dashboard')
             except ValidationError as e:
-                error_msg = ', '.join(e.messages) if hasattr(e, 'messages') else str(e)
-                messages.error(request, f'Validation error: {error_msg}')
+                # Handle different types of validation errors
+                if hasattr(e, 'error_dict'):
+                    # Field-specific errors
+                    error_messages = []
+                    for field, errors in e.error_dict.items():
+                        for error in errors:
+                            error_messages.append(str(error))
+                    messages.error(request, '; '.join(error_messages))
+                elif hasattr(e, 'messages'):
+                    # List of error messages
+                    messages.error(request, '; '.join(e.messages))
+                else:
+                    # Single error message
+                    messages.error(request, str(e))
             except Exception as e:
                 messages.error(request, 'An unexpected error occurred. Please try again.')
         else:
@@ -70,15 +82,23 @@ def dashboard(request):
 @login_required
 def daily_entry(request):
     """Daily entry view with date picker to select any date."""
+    # Get current date for comparison
+    auckland_tz = pytz.timezone('Pacific/Auckland')
+    today = timezone.now().astimezone(auckland_tz).date()
+    
     # Get date from GET parameter or default to today
     selected_date = request.GET.get('date')
     if selected_date:
         try:
             selected_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+            # Prevent future dates
+            if selected_date > today:
+                messages.warning(request, "Cannot view future dates")
+                return redirect(f'{reverse("timesheet:daily_entry")}?date={today}')
         except ValueError:
-            selected_date = timezone.now().date()
+            selected_date = today
     else:
-        selected_date = timezone.now().date()
+        selected_date = today
     
     # Get entries for selected date
     entries = TimeEntry.objects.filter(
@@ -117,9 +137,18 @@ def daily_entry(request):
     # Navigation dates
     prev_date = selected_date - timedelta(days=1)
     next_date = selected_date + timedelta(days=1)
+    # Don't allow next date navigation to future
+    if next_date > today:
+        next_date = None
+    
+    # Format selected date like dashboard
+    formatted_date = selected_date.strftime('%d %B, %Y').lstrip('0')
+    day_name = selected_date.strftime('%A')
     
     context = {
         'selected_date': selected_date,
+        'formatted_date': formatted_date,
+        'day_name': day_name,
         'entries': entries,
         'daily_total': daily_total,
         'form': form,
