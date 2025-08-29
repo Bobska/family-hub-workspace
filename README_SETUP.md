@@ -11,28 +11,36 @@ venv\Scripts\activate
 $env:DJANGO_SETTINGS_MODULE="FamilyHub.settings.development"
 python manage.py runserver
 # Visit: http://127.0.0.1:8000/
+# Admin: http://127.0.0.1:8000/admin/
 ```
 **Status**: ✅ **READY FOR DEVELOPMENT**  
 **Database**: SQLite (automatic setup)  
 **Features**: Integrated dashboard with timesheet app  
+**Admin Access**: ✅ Superuser configured  
 **Setup Time**: 2 minutes
 
-### 2. **PostgreSQL Docker Setup** - INFRASTRUCTURE READY 🐳
+### 2. **Standalone Timesheet App** - FULLY FUNCTIONAL ✅
+```powershell
+cd standalone-apps\timesheet
+venv\Scripts\activate
+$env:DJANGO_SETTINGS_MODULE="timesheet_project.settings"
+python manage.py runserver 8001
+# Visit: http://127.0.0.1:8001/
+# Admin: http://127.0.0.1:8001/admin/
+```
+**Status**: ✅ **READY FOR DEVELOPMENT**  
+**Database**: SQLite (independent setup)  
+**Features**: Complete time tracking system  
+**Admin Access**: ✅ Superuser configured  
+**Setup Time**: 2 minutes
+
+### 3. **PostgreSQL Docker Setup** - INFRASTRUCTURE READY �
 ```powershell
 docker ps  # Check: familyhub-postgres should be running
 ```
 **Status**: 🔧 Infrastructure complete, Django integration in progress  
 **Database**: PostgreSQL 17.6 in Docker  
 **Features**: Production-like environment ready
-
-### 3. **Standalone Timesheet App** - NEEDS CONFIGURATION 🔧
-```powershell
-cd standalone-apps\timesheet
-# Configuration updates needed
-```
-**Status**: ⚠️ Requires dependency fixes  
-**Database**: SQLite  
-**Features**: Independent timesheet system
 
 ## 🛠️ Available Commands
 
@@ -96,17 +104,61 @@ family-hub-workspace/
 4. `$env:DJANGO_SETTINGS_MODULE="FamilyHub.settings.development"`
 5. `python manage.py runserver`
 6. Visit: http://127.0.0.1:8000/
+7. Admin: http://127.0.0.1:8000/admin/ (admin/admin)
+
+### For Standalone Timesheet Development (2 minutes):
+1. Open PowerShell in project root  
+2. `cd standalone-apps\timesheet`
+3. `venv\Scripts\activate`
+4. `$env:DJANGO_SETTINGS_MODULE="timesheet_project.settings"`
+5. `python manage.py runserver 8001`
+6. Visit: http://127.0.0.1:8001/
+7. Admin: http://127.0.0.1:8001/admin/ (admin/admin)
 
 ### For PostgreSQL Testing (Infrastructure Ready):
 1. Check Docker containers: `docker ps`
 2. Verify PostgreSQL is running: `familyhub-postgres`
 3. Django integration: In progress
 
-### For Standalone Development (Needs Configuration):
-1. Navigate to: `cd standalone-apps\timesheet`
-2. Configuration fixes needed for dependencies
+## � Admin Access & Superusers
 
-## 💾 Database Options
+### Default Admin Credentials
+- **Username**: `admin`
+- **Password**: `admin`  
+- **Email**: `admin@familyhub.local`
+
+### Admin URLs
+- **FamilyHub**: http://127.0.0.1:8000/admin/
+- **Standalone Timesheet**: http://127.0.0.1:8001/admin/
+
+### Superuser Management
+```powershell
+# Check superuser status for all environments
+.\scripts\setup_superusers.ps1 status
+
+# Setup superusers for all environments  
+.\scripts\setup_superusers.ps1 all
+
+# Setup specific environment
+.\scripts\setup_superusers.ps1 familyhub
+.\scripts\setup_superusers.ps1 timesheet
+.\scripts\setup_superusers.ps1 docker
+```
+
+### Creating Custom Superuser
+```powershell
+# FamilyHub environment
+cd FamilyHub; venv\Scripts\activate
+$env:DJANGO_SETTINGS_MODULE="FamilyHub.settings.development"
+python manage.py createsuperuser
+
+# Standalone timesheet
+cd standalone-apps\timesheet; venv\Scripts\activate  
+$env:DJANGO_SETTINGS_MODULE="timesheet_project.settings"
+python manage.py createsuperuser
+```
+
+## �💾 Database Options
 
 ### SQLite (Default)
 - **Setup Time**: Instant
@@ -224,14 +276,25 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 - Django server starts without errors: ✅ **CONFIRMED**
 - Browser loads at http://127.0.0.1:8000/: ✅ **CONFIRMED** 
 - Dashboard shows timesheet integration: ✅ **CONFIRMED**
+- Admin access works at /admin/: ✅ **CONFIRMED**
+- Can login with admin/admin: ✅ **CONFIRMED**
 - Database operations work: ✅ **CONFIRMED**
 - Console shows "Starting development server": ✅ **CONFIRMED**
 
+### ✅ Standalone Timesheet Complete When:
+- Django server starts on port 8001: ✅ **CONFIRMED**
+- Browser loads at http://127.0.0.1:8001/: ✅ **CONFIRMED**
+- Admin access works at /admin/: ✅ **CONFIRMED** 
+- Can login with admin/admin: ✅ **CONFIRMED**
+- Independent timesheet functionality: ✅ **CONFIRMED**
+
 ### 🚀 Ready for Development:
-- ✅ FamilyHub dashboard accessible
-- ✅ Timesheet app integrated and working  
-- ✅ SQLite database ready
-- ✅ Django 5.2.5 running successfully
+- ✅ FamilyHub dashboard accessible with admin access
+- ✅ Standalone timesheet fully functional with admin access
+- ✅ Timesheet app integrated in FamilyHub
+- ✅ SQLite databases ready in both environments
+- ✅ Django 5.2.5 running successfully in both setups
+- ✅ All superusers configured and tested
 - 🐳 PostgreSQL infrastructure ready
 - 🔧 Docker containers healthy
 
