@@ -23,9 +23,21 @@
         border: 2px solid #0d6efd;
     }
     
+    /* Fix border-radius mismatch between card border and header */
+    .weekday-card .card-header:first-child,
+    .weekend-card .card-header:first-child {
+        border-radius: calc(var(--bs-card-inner-border-radius) - 2px) calc(var(--bs-card-inner-border-radius) - 2px) 0 0;
+    }
+    
+    /* Fix for today's card with thicker border */
+    .border-warning .card-header:first-child {
+        border-radius: calc(var(--bs-card-inner-border-radius) - 3px) calc(var(--bs-card-inner-border-radius) - 3px) 0 0;
+    }
+    
     /* Better spacing for the two-row layout */
     .day-column {
         margin-bottom: 1rem;
+        /* Removed border and border-radius that were causing double border effect */
     }
     
     /* Ensure equal height cards in each row */
