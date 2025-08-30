@@ -24,6 +24,8 @@ services:
       - ./FamilyHub:/app
     ports:
       - "8000:8000"
+    env_file:
+      - .env.docker
     environment:
       DATABASE_URL: postgresql://familyhub_user:TempPass123!ChangeMe@db:5432/familyhub_db
     depends_on:
