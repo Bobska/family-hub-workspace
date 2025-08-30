@@ -18,6 +18,25 @@ services:
       retries: 3
       start_period: 30s
 
+  db_init:
+    build: .
+    env_file:
+      - .env.docker
+    environment:
+      POSTGRES_ADMIN_USER: postgres
+      PGPASSWORD: TempPass123!ChangeMe
+    volumes:
+      - ./scripts:/app/scripts
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Database initialization service started...' &&
+        python /app/scripts/wait-for-postgres.py &&
+        echo 'Database initialization completed successfully'
+      "
+
   web:
     build: .
     volumes:
@@ -31,6 +50,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db_init:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:

@@ -19,6 +19,7 @@ ENV PYTHONUNBUFFERED=1
 COPY ./FamilyHub /app/FamilyHub
 COPY ./shared /app/shared
 COPY ./standalone-apps/timesheet/timesheet_app /app/timesheet_app
+COPY ./scripts /app/scripts
 
 # Set working directory to Django project root
 WORKDIR /app/FamilyHub
