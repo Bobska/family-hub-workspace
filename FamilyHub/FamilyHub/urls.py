@@ -7,7 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),  # Include home app URLs
     path('accounts/', include('django.contrib.auth.urls')),  # Authentication URLs
-    path('timesheet/', include('timesheet.urls')),  # Shared timesheet app
+    path('timesheet/', include('timesheet_app.urls', namespace='timesheet')),  # Integrated timesheet app
 ]
 
 if settings.DEBUG:
