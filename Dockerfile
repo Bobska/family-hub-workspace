@@ -27,9 +27,5 @@ WORKDIR /app/FamilyHub
 # Install Python dependencies
 RUN pip install --no-cache-dir -r /app/FamilyHub/requirements.txt
 
-# Copy entrypoint script
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-
-# Set entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Start Django application directly with simple wait
+CMD ["sh", "-c", "sleep 10 && cd /app/FamilyHub && python manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py init_superuser && gunicorn FamilyHub.wsgi:application --bind 0.0.0.0:8000"]

@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 
 # Add shared apps and timesheet app to Python path for dual deployment
-sys.path.insert(0, str(BASE_DIR.parent / 'timesheet_app'))
+sys.path.insert(0, str(BASE_DIR.parent))  # Add /app to path for timesheet_app
 sys.path.insert(0, str(BASE_DIR.parent / 'shared'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -77,7 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'apps.timesheet_integration.timesheet_context_processor',
+                # 'apps.timesheet_integration.timesheet_context_processor',  # Temporarily disabled
             ],
         },
     },

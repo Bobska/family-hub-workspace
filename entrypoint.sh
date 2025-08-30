@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Wait for PostgreSQL to be ready using our Python script
 echo "Waiting for PostgreSQL to be ready..."

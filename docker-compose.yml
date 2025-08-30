@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:17-alpine
@@ -7,6 +5,7 @@ services:
       POSTGRES_DB: familyhub_db
       POSTGRES_USER: familyhub_user
       POSTGRES_PASSWORD: TempPass123!ChangeMe
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -18,29 +17,10 @@ services:
       retries: 3
       start_period: 30s
 
-  db_init:
-    build: .
-    env_file:
-      - .env.docker
-    environment:
-      POSTGRES_ADMIN_USER: postgres
-      PGPASSWORD: TempPass123!ChangeMe
-    volumes:
-      - ./scripts:/app/scripts
-    depends_on:
-      db:
-        condition: service_healthy
-    command: >
-      sh -c "
-        echo 'Database initialization service started...' &&
-        python /app/scripts/wait-for-postgres.py &&
-        echo 'Database initialization completed successfully'
-      "
-
   web:
     build: .
     volumes:
-      - ./FamilyHub:/app
+      - ./FamilyHub:/app/FamilyHub
     ports:
       - "8000:8000"
     env_file:
@@ -50,8 +30,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      db_init:
-        condition: service_completed_successfully
 
 volumes:
   postgres_data:
