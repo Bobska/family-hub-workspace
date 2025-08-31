@@ -25,6 +25,7 @@ environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 # Add shared apps and timesheet app to Python path for dual deployment
 sys.path.insert(0, str(BASE_DIR.parent))  # Add /app to path for timesheet_app
 sys.path.insert(0, str(BASE_DIR.parent / 'shared'))
+sys.path.insert(0, str(BASE_DIR / 'apps'))  # Add apps directory to path
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-!+sc#yqiyk6&6e6($ansiej6t)v1$4if*!m*d6%ay&63l-32xh')
