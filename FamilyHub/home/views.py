@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.db import connection
 from django.core.cache import cache
+from django.conf import settings
 from datetime import datetime
 import logging
 
@@ -60,6 +61,7 @@ def home_dashboard(request):
         'apps': apps,
         'user': request.user,
         'today': datetime.now(),
+        'settings': settings,  # Add settings to template context
     }
     
     return render(request, 'home/dashboard.html', context)

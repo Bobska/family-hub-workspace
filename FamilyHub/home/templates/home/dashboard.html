@@ -144,7 +144,8 @@
 
         <!-- Apps Grid -->
         <div class="row apps-grid g-4">
-            <!-- Timesheet App -->
+            <!-- Timesheet App (only show if app is installed) -->
+            {% if 'timesheet_app' in settings.INSTALLED_APPS %}
             <div class="col-lg-4 col-md-6">
                 <div class="card app-card h-100">
                     <div class="card-body text-center d-flex flex-column">
@@ -159,6 +160,24 @@
                     </div>
                 </div>
             </div>
+            {% else %}
+            <!-- Timesheet Standalone Link (when not integrated) -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card app-card h-100">
+                    <div class="card-body text-center d-flex flex-column">
+                        <div class="card-icon">⏰</div>
+                        <h5 class="card-title">Timesheet</h5>
+                        <p class="card-description">Track work hours, manage jobs, and calculate earnings. Available as standalone app.</p>
+                        <div class="mt-auto">
+                            <a href="http://127.0.0.1:8001" target="_blank" class="btn btn-outline-primary btn-app">
+                                <i class="bi bi-box-arrow-up-right me-2"></i>Open Standalone
+                            </a>
+                            <small class="text-muted mt-2 d-block">Runs on port 8001</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Household Budget App -->
             <div class="col-lg-4 col-md-6">

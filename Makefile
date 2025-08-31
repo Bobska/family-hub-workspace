@@ -31,13 +31,24 @@ help: ## 📋 Show this help message with all available commands
 	@echo ""
 	@echo "🔧 Local Development (PowerShell Scripts):"
 	@echo "  local-setup       - Setup local environment (venv, dependencies)"
-	@echo "  local-start       - Start local development server"
+	@echo "  local-start       - Start local development server (basic)"
+	@echo "  local-start-full  - Start with integrated apps (timesheet included)"
 	@echo "  local-migrate     - Run local database migrations"
 	@echo "  local-test        - Run tests in local environment"
 	@echo "  local-shell       - Open Django shell in local environment"
 	@echo "  local-superuser   - Create superuser in local environment"
 	@echo "  local-check       - Run Django system checks locally"
 	@echo "  local-clean       - Clean local development environment"
+	@echo ""
+	@echo "📱 Standalone Apps (Independent Development):"
+	@echo "  local-start-timesheet      - Start timesheet app (port 8001)"
+	@echo "  local-start-daycare        - Start daycare invoice app (port 8002)"
+	@echo "  local-start-employment     - Start employment history app (port 8003)"
+	@echo "  local-start-payments       - Start upcoming payments app (port 8004)"
+	@echo "  local-start-credit         - Start credit card mgmt app (port 8005)"
+	@echo "  local-start-budget         - Start household budget app (port 8006)"
+	@echo "  local-setup-timesheet      - Setup timesheet standalone environment"
+	@echo "  local-test-timesheet       - Test timesheet standalone app"
 	@echo ""
 	@echo "🗄️  Database Commands:"
 	@echo "  migrate           - Apply database migrations"
@@ -119,6 +130,10 @@ local-start: ## 🚀 Start local development server (using PowerShell script)
 	@echo "🚀 Starting local development server..."
 	@cd FamilyHub && powershell -ExecutionPolicy Bypass -File dev-start-clean.ps1
 
+local-start-full: ## 🚀 Start local development server with all integrated apps
+	@echo "🚀 Starting local development server with full integration..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py check --settings=FamilyHub.settings.development_full; python manage.py runserver --settings=FamilyHub.settings.development_full }"
+
 local-migrate: ## 🗄️  Run local database migrations
 	@echo "🗄️  Running local database migrations..."
 	@cd FamilyHub && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py makemigrations --settings=FamilyHub.settings.development; python manage.py migrate --settings=FamilyHub.settings.development }"
@@ -144,6 +159,55 @@ local-clean: ## 🧹 Clean local development environment
 	@cd FamilyHub && if exist "db.sqlite3" del "db.sqlite3"
 	@cd FamilyHub && if exist "__pycache__" rmdir /s /q "__pycache__"
 	@echo "✅ Local environment cleaned"
+
+# =============================================================================
+# Standalone Apps Development (Independent of FamilyHub)
+# =============================================================================
+
+local-start-timesheet: ## 📋 Start timesheet standalone app (port 8001)
+	@echo "📋 Starting timesheet standalone app on port 8001..."
+	@cd standalone-apps\timesheet && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8001 }"
+
+local-start-daycare: ## 🏠 Start daycare invoice standalone app (port 8002)
+	@echo "🏠 Starting daycare invoice standalone app on port 8002..."
+	@cd standalone-apps\daycare_invoice && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8002 }"
+
+local-start-employment: ## 💼 Start employment history standalone app (port 8003)
+	@echo "💼 Starting employment history standalone app on port 8003..."
+	@cd standalone-apps\employment_history && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8003 }"
+
+local-start-payments: ## 💰 Start upcoming payments standalone app (port 8004)
+	@echo "💰 Starting upcoming payments standalone app on port 8004..."
+	@cd standalone-apps\upcoming_payments && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8004 }"
+
+local-start-credit: ## 💳 Start credit card mgmt standalone app (port 8005)
+	@echo "💳 Starting credit card management standalone app on port 8005..."
+	@cd standalone-apps\credit_card_mgmt && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8005 }"
+
+local-start-budget: ## 🏦 Start household budget standalone app (port 8006)
+	@echo "🏦 Starting household budget standalone app on port 8006..."
+	@cd standalone-apps\household_budget && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8006 }"
+
+local-setup-timesheet: ## 🔧 Setup timesheet standalone environment
+	@echo "🔧 Setting up timesheet standalone environment..."
+	@cd standalone-apps\timesheet && powershell -ExecutionPolicy Bypass -Command "& { if (!(Test-Path venv)) { python -m venv venv }; .\venv\Scripts\Activate.ps1; pip install -r requirements.txt; python manage.py migrate }"
+	@echo "✅ Timesheet standalone environment ready"
+
+local-test-timesheet: ## 🧪 Test timesheet standalone app
+	@echo "🧪 Testing timesheet standalone app..."
+	@cd standalone-apps\timesheet && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py test }"
+
+local-check-timesheet: ## ✅ Check timesheet standalone app
+	@echo "✅ Checking timesheet standalone app..."
+	@cd standalone-apps\timesheet && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py check }"
+
+local-migrate-timesheet: ## 🗄️ Migrate timesheet standalone app
+	@echo "🗄️ Migrating timesheet standalone app..."
+	@cd standalone-apps\timesheet && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py makemigrations; python manage.py migrate }"
+
+local-shell-timesheet: ## 🐚 Open timesheet standalone Django shell
+	@echo "🐚 Opening timesheet standalone Django shell..."
+	@cd standalone-apps\timesheet && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py shell }"
 
 dev-docker: ## 🐳 Start Docker development environment
 	@echo "🐳 Starting Docker development environment..."
@@ -411,6 +475,22 @@ local-fresh-start: ## 🆕 Complete fresh local start (setup, migrate, superuser
 	@$(MAKE) local-superuser
 	@$(MAKE) local-start
 	@echo "✅ Local fresh start complete! Application ready at http://127.0.0.1:8000"
+
+local-start-all-apps: ## 🚀 Start all standalone apps simultaneously (background)
+	@echo "🚀 Starting all standalone apps..."
+	@echo "📋 Timesheet: http://127.0.0.1:8001"
+	@echo "🏠 Daycare: http://127.0.0.1:8002"
+	@echo "💼 Employment: http://127.0.0.1:8003"
+	@echo "💰 Payments: http://127.0.0.1:8004"
+	@echo "💳 Credit: http://127.0.0.1:8005"
+	@echo "🏦 Budget: http://127.0.0.1:8006"
+	@start powershell -Command "cd standalone-apps\timesheet; .\venv\Scripts\Activate.ps1; python manage.py runserver 8001"
+	@start powershell -Command "cd standalone-apps\daycare_invoice; .\venv\Scripts\Activate.ps1; python manage.py runserver 8002"
+	@start powershell -Command "cd standalone-apps\employment_history; .\venv\Scripts\Activate.ps1; python manage.py runserver 8003"
+	@start powershell -Command "cd standalone-apps\upcoming_payments; .\venv\Scripts\Activate.ps1; python manage.py runserver 8004"
+	@start powershell -Command "cd standalone-apps\credit_card_mgmt; .\venv\Scripts\Activate.ps1; python manage.py runserver 8005"
+	@start powershell -Command "cd standalone-apps\household_budget; .\venv\Scripts\Activate.ps1; python manage.py runserver 8006"
+	@echo "✅ All apps starting in separate windows"
 
 quick-restart: ## ⚡ Quick restart without rebuild
 	@echo "⚡ Quick restart..."
