@@ -1,0 +1,193 @@
+<!-- Debug Widget - Only visible in DEBUG mode -->
+{% if debug_widget and debug %}
+<div id="debug-widget" class="debug-widget">
+    <div class="debug-toggle">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleDebugWidget()">
+            <i class="bi bi-info-circle"></i> Debug Info
+        </button>
+    </div>
+    
+    <div id="debug-content" class="debug-content" style="display: none;">
+        <div class="debug-header">
+            <h6 class="mb-0">
+                <i class="bi bi-bug"></i> System Debug Information
+                <button type="button" class="btn btn-sm btn-outline-light float-end" onclick="toggleDebugWidget()">
+                    <i class="bi bi-x"></i>
+                </button>
+            </h6>
+        </div>
+        
+        <div class="debug-body">
+            <div class="row g-2">
+                <!-- Database Info -->
+                <div class="col-md-3">
+                    <div class="debug-section">
+                        <h6><i class="bi bi-database"></i> Database</h6>
+                        <div class="debug-item">
+                            <span class="badge bg-{% if debug_widget.database.engine == 'postgresql' %}success{% else %}warning{% endif %}">
+                                {{ debug_widget.database.engine|title }}
+                            </span>
+                        </div>
+                        <small class="text-muted d-block">{{ debug_widget.database.name }}</small>
+                        <small class="text-muted d-block">{{ debug_widget.database.host }}:{{ debug_widget.database.port }}</small>
+                    </div>
+                </div>
+                
+                <!-- Environment Info -->
+                <div class="col-md-3">
+                    <div class="debug-section">
+                        <h6><i class="bi bi-gear"></i> Environment</h6>
+                        <div class="debug-item">
+                            <span class="badge bg-{% if debug_widget.environment.environment == 'Docker' %}info{% else %}secondary{% endif %}">
+                                {{ debug_widget.environment.environment }}
+                            </span>
+                        </div>
+                        <small class="text-muted d-block">Python {{ debug_widget.environment.python_version }}</small>
+                        <small class="text-muted d-block">
+                            {% if debug_widget.environment.is_standalone == True %}Standalone{% elif debug_widget.environment.is_standalone == False %}Integrated{% else %}{{ debug_widget.environment.is_standalone }}{% endif %}
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Apps Info -->
+                <div class="col-md-3">
+                    <div class="debug-section">
+                        <h6><i class="bi bi-app"></i> Apps</h6>
+                        <div class="debug-item">
+                            <span class="badge bg-primary">{{ debug_widget.apps.total_apps }} Apps</span>
+                        </div>
+                        <div class="debug-item">
+                            <span class="badge bg-{% if debug_widget.apps.timesheet_integrated %}success{% else %}secondary{% endif %}">
+                                {% if debug_widget.apps.timesheet_integrated %}Timesheet ✓{% else %}No Timesheet{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Info -->
+                <div class="col-md-3">
+                    <div class="debug-section">
+                        <h6><i class="bi bi-cpu"></i> System</h6>
+                        <div class="debug-item">
+                            <span class="badge bg-{% if debug_widget.status == 'healthy' %}success{% else %}danger{% endif %}">
+                                {{ debug_widget.status|title }}
+                            </span>
+                        </div>
+                        <small class="text-muted d-block">{{ debug_widget.environment.django_settings|truncatechars:30 }}</small>
+                        {% if debug_widget.environment.debug_mode %}
+                            <small class="text-warning"><i class="bi bi-exclamation-triangle"></i> DEBUG ON</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            {% if debug_widget.status == 'error' %}
+            <div class="alert alert-danger alert-sm mt-2 mb-0">
+                <small><strong>Error:</strong> {{ debug_widget.error }}</small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.debug-widget {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+    font-size: 0.8rem;
+}
+
+.debug-toggle {
+    text-align: right;
+}
+
+.debug-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 600px;
+    max-width: 90vw;
+    background: rgba(33, 37, 41, 0.95);
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    margin-top: 5px;
+}
+
+.debug-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px 8px 0 0;
+}
+
+.debug-body {
+    padding: 1rem;
+}
+
+.debug-section {
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    height: 100%;
+}
+
+.debug-section h6 {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    color: #adb5bd;
+}
+
+.debug-item {
+    margin-bottom: 0.25rem;
+}
+
+.debug-widget .badge {
+    font-size: 0.65rem;
+    margin-right: 0.25rem;
+}
+
+.debug-widget small {
+    font-size: 0.65rem;
+    line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+    .debug-content {
+        width: 350px;
+    }
+    
+    .debug-section h6 {
+        font-size: 0.7rem;
+    }
+    
+    .debug-widget .badge {
+        font-size: 0.6rem;
+    }
+}
+</style>
+
+<script>
+function toggleDebugWidget() {
+    const content = document.getElementById('debug-content');
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+    } else {
+        content.style.display = 'none';
+    }
+}
+
+// Close debug widget when clicking outside
+document.addEventListener('click', function(event) {
+    const widget = document.getElementById('debug-widget');
+    const content = document.getElementById('debug-content');
+    
+    if (widget && !widget.contains(event.target) && content.style.display === 'block') {
+        content.style.display = 'none';
+    }
+});
+</script>
+{% endif %}

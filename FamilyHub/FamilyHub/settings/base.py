@@ -78,6 +78,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'home.context_processors.debug_info',  # Debug widget information
                 # 'apps.timesheet_integration.timesheet_context_processor',  # Temporarily disabled
             ],
         },
