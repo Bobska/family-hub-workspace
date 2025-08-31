@@ -14,6 +14,7 @@ WORKDIR /app
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=FamilyHub.settings.docker
 
 # Copy application directories
 COPY ./FamilyHub /app/FamilyHub
