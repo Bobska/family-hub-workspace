@@ -29,6 +29,16 @@ help: ## 📋 Show this help message with all available commands
 	@echo "  build             - Build Docker containers (no cache)"
 	@echo "  rebuild           - Rebuild and restart all services"
 	@echo ""
+	@echo "🔧 Local Development (PowerShell Scripts):"
+	@echo "  local-setup       - Setup local environment (venv, dependencies)"
+	@echo "  local-start       - Start local development server"
+	@echo "  local-migrate     - Run local database migrations"
+	@echo "  local-test        - Run tests in local environment"
+	@echo "  local-shell       - Open Django shell in local environment"
+	@echo "  local-superuser   - Create superuser in local environment"
+	@echo "  local-check       - Run Django system checks locally"
+	@echo "  local-clean       - Clean local development environment"
+	@echo ""
 	@echo "🗄️  Database Commands:"
 	@echo "  migrate           - Apply database migrations"
 	@echo "  makemigrations    - Create new database migrations"
@@ -96,6 +106,44 @@ setup: ## 🔧 Initial project setup (first-time use)
 dev-local: ## 🖥️  Run Django development server locally (without Docker)
 	@echo "🖥️  Starting local development server..."
 	@cd FamilyHub && python manage.py runserver --settings=FamilyHub.settings.development
+
+# =============================================================================
+# Local Development Script Shortcuts (PowerShell-based)
+# =============================================================================
+
+local-setup: ## 🔧 Setup local development environment (virtual env, dependencies)
+	@echo "🔧 Setting up local development environment..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -File dev-setup-new.ps1
+
+local-start: ## 🚀 Start local development server (using PowerShell script)
+	@echo "🚀 Starting local development server..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -File dev-start-clean.ps1
+
+local-migrate: ## 🗄️  Run local database migrations
+	@echo "🗄️  Running local database migrations..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py makemigrations --settings=FamilyHub.settings.development; python manage.py migrate --settings=FamilyHub.settings.development }"
+
+local-test: ## 🧪 Run tests in local environment
+	@echo "🧪 Running tests in local environment..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py test --settings=FamilyHub.settings.development }"
+
+local-shell: ## 🐚 Open Django shell in local environment
+	@echo "🐚 Opening Django shell in local environment..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py shell --settings=FamilyHub.settings.development }"
+
+local-superuser: ## 👤 Create superuser in local environment
+	@echo "👤 Creating superuser in local environment..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py createsuperuser --settings=FamilyHub.settings.development }"
+
+local-check: ## ✅ Run Django system checks in local environment
+	@echo "✅ Running Django system checks in local environment..."
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py check --settings=FamilyHub.settings.development }"
+
+local-clean: ## 🧹 Clean local development environment
+	@echo "🧹 Cleaning local development environment..."
+	@cd FamilyHub && if exist "db.sqlite3" del "db.sqlite3"
+	@cd FamilyHub && if exist "__pycache__" rmdir /s /q "__pycache__"
+	@echo "✅ Local environment cleaned"
 
 dev-docker: ## 🐳 Start Docker development environment
 	@echo "🐳 Starting Docker development environment..."
@@ -355,6 +403,14 @@ fresh-start: ## 🆕 Complete fresh start (build, migrate, create superuser)
 	@$(MAKE) init-superuser
 	@$(MAKE) status
 	@echo "✅ Fresh start complete! Application ready at http://localhost:8000"
+
+local-fresh-start: ## 🆕 Complete fresh local start (setup, migrate, superuser, run)
+	@echo "🆕 Starting fresh local development environment..."
+	@$(MAKE) local-setup
+	@$(MAKE) local-migrate
+	@$(MAKE) local-superuser
+	@$(MAKE) local-start
+	@echo "✅ Local fresh start complete! Application ready at http://127.0.0.1:8000"
 
 quick-restart: ## ⚡ Quick restart without rebuild
 	@echo "⚡ Quick restart..."
