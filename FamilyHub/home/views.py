@@ -9,7 +9,7 @@ from django.views.decorators.cache import cache_page
 import logging
 import time
 
-from .app_registry import apps_registry
+from FamilyHub.app_registry import app_registry
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +17,14 @@ logger = logging.getLogger(__name__)
 def home_dashboard(request):
     """
     Main dashboard view showing all apps overview.
-    App data is now provided by the familyhub_context processor.
+    Uses dynamic app registry to show current app status.
     """
     
+    # Get dynamic app data
+    apps_data = app_registry.get_dashboard_data()
+    
     context = {
+        'apps': apps_data,
         'user': request.user,
         'today': timezone.now(),
     }
@@ -31,15 +35,18 @@ def home_dashboard(request):
 def debug_dashboard(request):
     """Visual debug dashboard showing template and app information"""
     
+    # Get app statuses for debugging
+    app_statuses = app_registry.get_all_app_statuses()
+    apps_data = app_registry.get_dashboard_data()
+    
     # Get additional debug information
     template_dirs = []
     if hasattr(settings, 'TEMPLATES') and settings.TEMPLATES:
         template_dirs = settings.TEMPLATES[0].get('DIRS', [])
     
     context = {
-        'apps': apps_registry.to_dict_list(),
-        'all_apps': apps_registry.get_all_apps(),
-        'integrated_apps': apps_registry.get_integrated_apps(),
+        'apps': apps_data,
+        'app_statuses': app_statuses,
         'user': request.user,
         'today': timezone.now(),
         'settings_info': {
@@ -49,9 +56,9 @@ def debug_dashboard(request):
             'DATABASE_ENGINE': settings.DATABASES['default']['ENGINE'],
         },
         'registry_stats': {
-            'total_apps': len(apps_registry.get_all_apps()),
-            'active_apps': len(apps_registry.get_active_apps()),
-            'integrated_apps': len(apps_registry.get_integrated_apps()),
+            'total_apps': len(app_registry.known_apps),
+            'available_apps': len(app_registry.get_available_apps()),
+            'integrated_apps': len([a for a in app_registry.get_all_app_statuses().values() if a['status'] == 'integrated']),
         }
     }
     
@@ -109,8 +116,8 @@ def health_check(request):
         },
         'total_duration_ms': round(total_duration, 2),
         'app_registry': {
-            'total_apps': len(apps_registry.get_all_apps()),
-            'active_apps': len(apps_registry.get_active_apps()),
+            'total_apps': len(app_registry.known_apps),
+            'available_apps': len(app_registry.get_available_apps()),
         }
     }
     

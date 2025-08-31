@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from .app_registry import get_dynamic_url_patterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -9,9 +10,15 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),  # Authentication URLs
 ]
 
-# Only include timesheet URLs if the app is installed (for Docker/production)
-if 'timesheet_app' in settings.INSTALLED_APPS:
-    urlpatterns.append(path('timesheet/', include('timesheet_app.urls', namespace='timesheet')))
+# Add dynamic app URLs
+dynamic_apps = get_dynamic_url_patterns()
+for url_pattern, include_path, namespace in dynamic_apps:
+    try:
+        urlpatterns.append(path(url_pattern, include(include_path, namespace=namespace)))
+    except ImportError as e:
+        # App URLs not available, skip silently in production
+        if settings.DEBUG:
+            print(f"Warning: Could not load URLs for {namespace}: {e}")
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

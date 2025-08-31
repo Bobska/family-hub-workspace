@@ -1,17 +1,7 @@
 from .base import *
 
-# Override INSTALLED_APPS for local development (without timesheet_app integration)
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    
-    # Core FamilyHub apps only for local development
-    'home',
-]
+# Use the INSTALLED_APPS from base.py (includes integrated apps)
+# No override needed - let base.py handle app discovery
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

@@ -22,36 +22,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Read .env file
 environ.Env.read_env(os.path.join(BASE_DIR.parent, '.env'))
 
-# Add shared apps and timesheet app to Python path for dual deployment
-sys.path.insert(0, str(BASE_DIR.parent))  # Add /app to path for timesheet_app
-sys.path.insert(0, str(BASE_DIR.parent / 'shared'))
+# Add apps directory to Python path so Django can find app modules
 sys.path.insert(0, str(BASE_DIR / 'apps'))  # Add apps directory to path
+sys.path.insert(0, str(BASE_DIR))  # Add FamilyHub directory to path
+
+# Add shared apps path
+sys.path.insert(0, str(BASE_DIR.parent / 'shared'))
+
+# Import dynamic app registry
+from ..app_registry import get_dynamic_installed_apps
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-!+sc#yqiyk6&6e6($ansiej6t)v1$4if*!m*d6%ay&63l-32xh')
 
-# Application definition
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    
-    # Core FamilyHub apps
-    'home',
-    
-    # Shared integrated apps
-    'timesheet_app',  # Timesheet app from standalone integration
-    
-    # Future standalone apps - will be uncommented as they are developed
-    # 'apps.daycare_invoice_app',
-    # 'apps.employment_history_app',
-    # 'apps.upcoming_payments_app',
-    # 'apps.credit_card_mgmt_app',
-    # 'apps.household_budget_app',
-]
+# Application definition - Dynamic app discovery
+INSTALLED_APPS = get_dynamic_installed_apps()
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

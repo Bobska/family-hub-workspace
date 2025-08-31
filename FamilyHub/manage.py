@@ -2,7 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from pathlib import Path
 
+# Add the apps directory to Python path so Django can find app modules
+current_dir = Path(__file__).resolve().parent
+apps_dir = current_dir / 'apps'
+sys.path.insert(0, str(apps_dir))  # Add apps directory first
+sys.path.insert(0, str(current_dir))  # Add FamilyHub directory
 
 def main():
     """Run administrative tasks."""
