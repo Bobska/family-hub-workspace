@@ -1,8 +1,12 @@
 {% extends 'timesheet/base.html' %}
+{% load debug_tags %}
 
 {% block title %}{{ title }} - Timesheet{% endblock %}
 
 {% block content %}
+{% template_info "timesheet/entry_form.html" %}
+{% debug_context_vars "title" "form" "user" "entry" %}
+
 <div class="row justify-content-center">
     <div class="col-lg-8 col-xl-6">
         <!-- Page Header -->

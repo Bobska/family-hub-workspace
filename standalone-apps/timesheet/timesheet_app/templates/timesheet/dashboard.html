@@ -1,8 +1,11 @@
 {% extends 'timesheet/base.html' %}
+{% load debug_tags %}
 
 {% block title %}Dashboard - Timesheet{% endblock %}
 
 {% block content %}
+{% template_info "timesheet/dashboard.html" %}
+
 <div class="row">
     <!-- Page Header -->
     <div class="col-12">
@@ -203,6 +206,22 @@
         </div>
     </div>
 </div>
+
+<!-- Debug Section (only shown in DEBUG mode) -->
+{% if debug %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+            <h6><i class="fas fa-bug me-2"></i>Standalone Debug Mode Active</h6>
+            <p class="mb-2">Template debugging features are enabled for this standalone timesheet app.</p>
+            <a href="{% url 'timesheet:template_debug' %}" class="btn btn-outline-warning btn-sm">
+                <i class="fas fa-code me-1"></i>View Template Debug Showcase
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
