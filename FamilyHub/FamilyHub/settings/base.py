@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'home',
     
     # Shared integrated apps
-    'timesheet_app',  # Timesheet app from timesheet_app directory
+    'timesheet_app',  # Timesheet app from standalone integration
     
     # Future standalone apps - will be uncommented as they are developed
     # 'apps.daycare_invoice_app',

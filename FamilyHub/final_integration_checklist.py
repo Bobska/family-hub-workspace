@@ -18,10 +18,10 @@ def run_final_checklist():
     print("1. PYTHON PATH INTEGRATION")
     print("-" * 40)
     try:
-        from timesheet.models import Job, TimeEntry
-        from timesheet.views import dashboard, entry_add
-        from timesheet.forms import JobForm, TimeEntryForm
-        from timesheet.apps import TimesheetAppConfig
+        from timesheet_app.models import Job, TimeEntry
+        from timesheet_app.views import dashboard, entry_add
+        from timesheet_app.forms import JobForm, TimeEntryForm
+        from timesheet_app.apps import TimesheetAppConfig
         
         checklist_items.append(("✅", "Python imports working correctly"))
         print("   ✅ All timesheet modules import successfully")
@@ -39,10 +39,15 @@ def run_final_checklist():
         from django.db import connection
         
         with connection.cursor() as cursor:
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'timesheet_%'")
+            cursor.execute("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_name LIKE 'timesheet_app_%' 
+                AND table_schema = 'public'
+            """)
             tables = cursor.fetchall()
             
-        expected_tables = ['timesheet_job', 'timesheet_timeentry']
+        expected_tables = ['timesheet_app_job', 'timesheet_app_timeentry']
         found_tables = [table[0] for table in tables]
         
         all_tables_exist = all(table in found_tables for table in expected_tables)
@@ -298,7 +303,7 @@ def run_final_checklist():
         
         # Check INSTALLED_APPS
         installed_apps = getattr(settings, 'INSTALLED_APPS', [])
-        timesheet_in_apps = 'timesheet' in installed_apps
+        timesheet_in_apps = 'timesheet_app' in installed_apps
         
         if timesheet_in_apps:
             checklist_items.append(("✅", "Timesheet app in INSTALLED_APPS"))
