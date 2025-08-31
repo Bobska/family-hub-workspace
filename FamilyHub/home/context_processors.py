@@ -1,6 +1,7 @@
 """
-Debug Context Processor
-Provides debug information for the visual debug widget
+FamilyHub Context Processors
+
+Provides common context data to all templates including debug information.
 """
 
 import os
@@ -8,6 +9,23 @@ import sys
 from django.conf import settings
 from django.db import connection
 from django.apps import apps
+from .app_registry import apps_registry
+
+
+def familyhub_context(request):
+    """
+    Add common FamilyHub context to all templates.
+    
+    This context processor provides:
+    - App registry data for navigation
+    - Common settings for templates
+    - User-specific data
+    """
+    return {
+        'familyhub_apps': apps_registry.get_active_apps(),
+        'familyhub_debug': settings.DEBUG,
+        'familyhub_version': getattr(settings, 'APP_VERSION', '1.0.0'),
+    }
 
 
 def debug_info(request):
