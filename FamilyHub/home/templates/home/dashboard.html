@@ -1,8 +1,11 @@
 ﻿{% extends "base.html" %}
+{% load debug_tags %}
 
 {% block title %}FamilyHub Dashboard{% endblock %}
 
 {% block content %}
+{% template_info "home/dashboard.html" %}
+
 <!-- FamilyHub Dashboard -->
 <div class="container mt-4">
     <div class="row">
@@ -40,6 +43,21 @@
         </div>
         {% endfor %}
     </div>
+    
+    <!-- Debug Section (only shown in DEBUG mode) -->
+    {% if debug %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+                <h6><i class="fas fa-bug me-2"></i>Debug Mode Active</h6>
+                <p class="mb-2">Template debugging features are enabled. This section is only visible in development.</p>
+                <a href="{% url 'home:template_debug' %}" class="btn btn-outline-warning btn-sm">
+                    <i class="fas fa-code me-1"></i>View Template Debug Showcase
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <!-- Debug Information -->
     <div class="row mt-4">
