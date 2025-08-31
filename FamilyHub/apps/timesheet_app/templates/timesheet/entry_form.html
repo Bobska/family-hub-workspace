@@ -20,9 +20,15 @@
                 </p>
             </div>
             <div>
-                <a href="{% url 'timesheet:daily_entry' %}?date={{ entry.date|date:'Y-m-d' }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Back to {{ entry.date|date:"M d" }}
-                </a>
+                {% if entry %}
+                    <a href="{% url 'timesheet:daily_entry' %}?date={{ entry.date|date:'Y-m-d' }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to {{ entry.date|date:"M d" }}
+                    </a>
+                {% else %}
+                    <a href="{% url 'timesheet:dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                {% endif %}
             </div>
         </div>
         
@@ -129,21 +135,31 @@
                     
                     <!-- Form Actions -->
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% url 'timesheet:daily_entry' %}?date={{ entry.date|date:'Y-m-d' }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times me-1"></i>Cancel
-                        </a>
-                        <a href="{% url 'timesheet:entry_delete' entry.pk %}" class="btn btn-outline-danger">
-                            <i class="fas fa-trash me-1"></i>Delete Entry
-                        </a>
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="fas fa-save me-1"></i>Update Entry
-                        </button>
+                        {% if entry %}
+                            <a href="{% url 'timesheet:daily_entry' %}?date={{ entry.date|date:'Y-m-d' }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <a href="{% url 'timesheet:entry_delete' entry.pk %}" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-1"></i>Delete Entry
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-save me-1"></i>Update Entry
+                            </button>
+                        {% else %}
+                            <a href="{% url 'timesheet:dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-plus me-1"></i>Add Entry
+                            </button>
+                        {% endif %}
                     </div>
                 </form>
             </div>
         </div>
         
-        <!-- Entry Information -->
+        <!-- Entry Information (only show for existing entries) -->
+        {% if entry %}
         <div class="card mt-4">
             <div class="card-header">
                 <h6 class="card-title mb-0">
@@ -172,6 +188,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -210,7 +227,7 @@
         const date = document.getElementById('id_date').value;
         const startTime = document.getElementById('id_start_time').value;
         const endTime = document.getElementById('id_end_time').value;
-        const entryId = '{{ entry.pk }}';
+        const entryId = '{% if entry %}{{ entry.pk }}{% else %}{% endif %}';
         
         if (date && startTime && endTime) {
             fetch('{% url "timesheet:validate_overlap" %}', {
