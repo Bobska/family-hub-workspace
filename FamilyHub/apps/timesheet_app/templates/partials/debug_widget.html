@@ -1,33 +1,56 @@
-<!-- Debug Widget - Only visible in DEBUG mode -->
-{% if debug_widget and debug %}
-<div id="debug-widget" class="debug-widget">
-    <div class="debug-toggle">
-        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleDebugWidget()">
-            <i class="fa fa-info-circle"></i> Debug Info
-        </button>
-    </div>
-    
-    <div id="debug-content" class="debug-content" style="display: none;">
-        <div class="debug-header">
-            <h6 class="mb-0">
-                <i class="fa fa-bug"></i> System Debug Information
-                <button type="button" class="btn btn-sm btn-outline-light float-end" onclick="toggleDebugWidget()">
-                    <i class="fa fa-times"></i>
-                </button>
-            </h6>
+{% comment %}
+Debug Widget for FamilyHub Integrated Timesheet
+Shows purple banner for integrated mode vs orange for standalone
+{% endcomment %}
+
+{% load debug_tags %}
+
+{% if debug %}
+<!-- Purple Debug Banner for FamilyHub Integrated Mode -->
+<div id="debug-widget" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    color: white;
+    padding: 8px 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-clock" style="font-size: 14px;"></i>
+            <strong>Timesheet (FamilyHub Integrated)</strong>
+            <span style="opacity: 0.8;">|</span>
+            <span>FAMILYHUB_INTEGRATED Mode</span>
+            <span style="opacity: 0.8;">|</span>
+            <span>Port 8000</span>
+            <span style="opacity: 0.8;">|</span>
+            <span style="font-size: 10px; opacity: 0.7;">FamilyHub/apps/timesheet_app/templates/</span>
         </div>
-        
-        <div class="debug-body">
-            <div class="row g-2">
-                <!-- Database Info -->
-                <div class="col-md-3">
-                    <div class="debug-section">
-                        <h6><i class="fa fa-database"></i> Database</h6>
-                        <div class="debug-item">
-                            <span class="badge bg-{% if debug_widget.database.engine == 'postgresql' %}success{% elif debug_widget.database.engine == 'sqlite' %}warning{% else %}secondary{% endif %}">
-                                {{ debug_widget.database.engine|title }}
-                            </span>
-                        </div>
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 10px; opacity: 0.8;">
+            <span>{% now "H:i:s" %}</span>
+            <span>INTEGRATED</span>
+        </div>
+    </div>
+</div>
+
+<!-- Add padding to body to account for fixed debug widget -->
+<style>
+    body { 
+        padding-top: 50px !important; 
+    }
+    .debug-highlight { 
+        background-color: rgba(118, 75, 162, 0.2); 
+        padding: 2px 4px; 
+        border-radius: 3px; 
+    }
+</style>
+{% endif %}
                         <small class="text-muted d-block">{{ debug_widget.database.name }}</small>
                         <small class="text-muted d-block">{{ debug_widget.database.host }}:{{ debug_widget.database.port }}</small>
                     </div>

@@ -460,3 +460,29 @@ def validate_overlap(request):
             })
     
     return JsonResponse({'valid': False, 'message': 'Invalid request'})
+
+
+@login_required
+def debug_showcase(request):
+    """
+    Debug showcase view - only available in DEBUG mode
+    Shows template debugging system for FamilyHub integrated timesheet app
+    """
+    from django.conf import settings
+    
+    if not settings.DEBUG:
+        messages.error(request, 'Debug views are only available in DEBUG mode.')
+        return redirect('timesheet:dashboard')
+    
+    context = {
+        'title': 'Debug Showcase - FamilyHub Integrated Timesheet',
+        'debug_info': {
+            'template_location': 'FamilyHub/apps/timesheet_app/templates/',
+            'mode': 'FAMILYHUB_INTEGRATED',
+            'app_name': 'Timesheet (FamilyHub Integrated)',
+            'port': '8000',
+            'debug_enabled': settings.DEBUG,
+        }
+    }
+    
+    return render(request, 'timesheet/debug_showcase.html', context)

@@ -20,5 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('', include('timesheet.urls')),  # Shared timesheet app at root path
+    path('', include('timesheet_app.urls')),  # Standalone timesheet app at root path
 ]

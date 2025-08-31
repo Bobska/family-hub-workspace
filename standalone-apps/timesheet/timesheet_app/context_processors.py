@@ -76,3 +76,21 @@ def debug_info(request):
                 'system': {'base_dir': 'Error loading'},
             }
         }
+
+
+def deployment_context(request):
+    """
+    Context processor that provides deployment information for standalone mode
+    """
+    if not getattr(settings, 'DEBUG', False):
+        return {}
+    
+    return {
+        'deployment_info': {
+            'mode': 'standalone',
+            'port': 8001,
+            'app_name': 'Timesheet Standalone',
+            'theme': 'orange',
+            'architecture': 'Independent Django App'
+        }
+    }

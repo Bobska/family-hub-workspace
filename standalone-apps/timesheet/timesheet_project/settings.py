@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'timesheet',  # Shared timesheet app from shared/apps/timesheet/
+    'timesheet_app',  # Local timesheet app
 ]
 
 MIDDLEWARE = [
@@ -67,7 +67,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'timesheet_app.context_processors.debug_info',  # Debug widget information
-                'timesheet.context_processors.deployment_context',
+                'timesheet_app.context_processors.deployment_context',
             ],
         },
     },

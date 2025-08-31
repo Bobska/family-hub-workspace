@@ -22,4 +22,7 @@ urlpatterns = [
     
     # AJAX endpoints
     path('api/validate-overlap/', views.validate_overlap, name='validate_overlap'),
+    
+    # Debug endpoints (only in DEBUG mode)
+    path('debug/', views.debug_showcase, name='debug_showcase'),
 ]

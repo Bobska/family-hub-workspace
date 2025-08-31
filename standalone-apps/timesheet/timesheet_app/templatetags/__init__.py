@@ -1,1 +1,1 @@
-# Template tags for timesheet app debug functionality
+# Empty file to make directory a Python package

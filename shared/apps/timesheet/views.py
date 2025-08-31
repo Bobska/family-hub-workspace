@@ -467,3 +467,29 @@ def validate_overlap(request):
             })
     
     return JsonResponse({'valid': False, 'message': 'Invalid request'})
+
+
+@login_required
+def debug_showcase(request):
+    """
+    Debug showcase view - only available in DEBUG mode
+    Shows template debugging system for shared timesheet app
+    """
+    from django.conf import settings
+    
+    if not settings.DEBUG:
+        messages.error(request, 'Debug views are only available in DEBUG mode.')
+        return redirect('timesheet:dashboard')
+    
+    context = {
+        'title': 'Debug Showcase - Shared Timesheet',
+        'debug_info': {
+            'template_location': 'shared/apps/timesheet/templates/',
+            'mode': 'INTEGRATED',
+            'app_name': 'Timesheet (Integrated)',
+            'port': '8000',
+            'debug_enabled': settings.DEBUG,
+        }
+    }
+    
+    return render(request, 'timesheet/debug_showcase.html', context)

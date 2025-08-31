@@ -1,0 +1,96 @@
+{% extends 'timesheet/base.html' %}
+{% load debug_tags %}
+
+{% block title %}Debug Showcase - Shared Timesheet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-bug me-2"></i>
+                        Template Debug System - Shared Location
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>Debug System Status</h5>
+                        <p><strong>Location:</strong> shared/apps/timesheet/templates/</p>
+                        <p><strong>Mode:</strong> Integrated (Purple Banner)</p>
+                        <p><strong>Port:</strong> 8000 (FamilyHub)</p>
+                        <p><strong>Context:</strong> {% debug_context %}</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Template Location Verification</h5>
+                            <div class="bg-light p-3 rounded">
+                                <strong>Active Templates:</strong><br>
+                                <code>shared/apps/timesheet/templates/</code><br>
+                                <small class="text-muted">✅ This is the correct, active location</small>
+                            </div>
+                            
+                            <h5 class="mt-4">Debug Features</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Purple debug banner (integrated mode)
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Template location indicator
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Debug context information
+                                </li>
+                                <li class="list-group-item">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Text highlighting filter
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Debug Highlighting Demo</h5>
+                            <div class="bg-light p-3 rounded">
+                                <p>Normal text: Hello World</p>
+                                <p>Highlighted: {{ "Hello World"|debug_highlight|safe }}</p>
+                                <p>Current time: {{ "now"|debug_highlight|safe }}</p>
+                                <p>App name: {{ "Timesheet App"|debug_highlight|safe }}</p>
+                            </div>
+                            
+                            <h5 class="mt-4">Template Status</h5>
+                            <div class="alert alert-success">
+                                <strong>✅ Cleanup Complete!</strong><br>
+                                <small>Duplicate templates removed from standalone-apps/</small><br>
+                                <small>Debug system now working in correct shared/ location</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Navigation Test</h5>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{% url 'timesheet:dashboard' %}" class="btn btn-primary">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                            <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-secondary">
+                                <i class="fas fa-calendar-day me-1"></i>Daily Entry
+                            </a>
+                            <a href="{% url 'timesheet:weekly_summary' %}" class="btn btn-secondary">
+                                <i class="fas fa-calendar-week me-1"></i>Weekly Summary
+                            </a>
+                            <a href="{% url 'timesheet:job_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-briefcase me-1"></i>Jobs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
