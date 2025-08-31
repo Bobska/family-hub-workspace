@@ -1,263 +1,55 @@
-{% extends 'base.html' %}
+﻿{% extends "base.html" %}
 
 {% block title %}FamilyHub Dashboard{% endblock %}
 
-{% block extra_css %}
-    <style>
-        /* Gradient Background */
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        /* Navigation Styling */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Welcome Message */
-        .welcome-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 2rem;
-        }
-        
-        .welcome-text {
-            color: white;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* App Cards */
-        .app-card {
-            background: rgba(255, 255, 255, 0.95);
-            border: none;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            height: 100%;
-            overflow: hidden;
-        }
-        
-        .app-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-        }
-        
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        
-        .card-title {
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: #2c3e50;
-        }
-        
-        .card-description {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .btn-app {
-            border-radius: 25px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-app:hover {
-            transform: scale(1.05);
-            text-decoration: none;
-        }
-        
-        /* Responsive Grid */
-        .apps-grid {
-            margin-top: 2rem;
-        }
-        
-        @media (max-width: 768px) {
-            .app-card {
-                margin-bottom: 1.5rem;
-            }
-            
-            .card-icon {
-                font-size: 2.5rem;
-            }
-            
-            .welcome-section h1 {
-                font-size: 1.8rem;
-            }
-        }
-        
-        /* Container styling */
-        .main-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-        
-        /* Footer spacing */
-        .footer-spacing {
-            height: 3rem;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
-                                <i class="bi bi-person-circle me-1"></i>{{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-    <!-- Main Content -->
-    <div class="container main-container">
-        <!-- Welcome Section -->
-        {% if user.is_authenticated %}
-        <div class="welcome-section p-4 text-center">
-            <h1 class="welcome-text mb-3">Welcome back, {{ user.first_name|default:user.username }}!</h1>
-            <p class="welcome-text mb-0 lead">Manage your family's finances, schedules, and important information all in one place.</p>
-        </div>
-        {% else %}
-        <div class="welcome-section p-4 text-center">
-            <h1 class="welcome-text mb-3">Welcome to FamilyHub!</h1>
-            <p class="welcome-text mb-0 lead">Your integrated family management platform. Please log in to access your dashboard.</p>
-        </div>
-        {% endif %}
-
-        <!-- Apps Grid -->
-        <div class="row apps-grid g-4">
-            <!-- Timesheet App (only show if app is installed) -->
-            {% if 'timesheet_app' in settings.INSTALLED_APPS %}
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">⏰</div>
-                        <h5 class="card-title">Timesheet</h5>
-                        <p class="card-description">Track work hours, manage jobs, and calculate earnings with detailed time entry logging.</p>
-                        <div class="mt-auto">
-                            <a href="/timesheet/" class="btn btn-primary btn-app">
-                                <i class="bi bi-clock me-2"></i>Track Hours
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <!-- Timesheet Standalone Link (when not integrated) -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">⏰</div>
-                        <h5 class="card-title">Timesheet</h5>
-                        <p class="card-description">Track work hours, manage jobs, and calculate earnings. Available as standalone app.</p>
-                        <div class="mt-auto">
-                            <a href="http://127.0.0.1:8001" target="_blank" class="btn btn-outline-primary btn-app">
-                                <i class="bi bi-box-arrow-up-right me-2"></i>Open Standalone
-                            </a>
-                            <small class="text-muted mt-2 d-block">Runs on port 8001</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Household Budget App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">💰</div>
-                        <h5 class="card-title">Household Budget</h5>
-                        <p class="card-description">Manage family finances, track expenses, and monitor your budget goals effectively.</p>
-                        <div class="mt-auto">
-                            <a href="/budget/" class="btn btn-success btn-app">
-                                <i class="bi bi-piggy-bank me-2"></i>Manage Budget
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Daycare Invoices App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">🧒</div>
-                        <h5 class="card-title">Daycare Invoices</h5>
-                        <p class="card-description">Track daycare bills, payment schedules, and maintain records of childcare expenses.</p>
-                        <div class="mt-auto">
-                            <a href="/daycare/" class="btn btn-info btn-app">
-                                <i class="bi bi-receipt me-2"></i>View Invoices
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Employment History App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">💼</div>
-                        <h5 class="card-title">Employment History</h5>
-                        <p class="card-description">Maintain comprehensive career records, job history, and professional achievements.</p>
-                        <div class="mt-auto">
-                            <a href="/employment/" class="btn btn-warning btn-app">
-                                <i class="bi bi-briefcase me-2"></i>Career Records
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upcoming Payments App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">📅</div>
-                        <h5 class="card-title">Upcoming Payments</h5>
-                        <p class="card-description">Never miss payment deadlines with organized tracking of bills and financial obligations.</p>
-                        <div class="mt-auto">
-                            <a href="/payments/" class="btn btn-danger btn-app">
-                                <i class="bi bi-calendar-check me-2"></i>View Payments
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Credit Cards App -->
-            <div class="col-lg-4 col-md-6">
-                <div class="card app-card h-100">
-                    <div class="card-body text-center d-flex flex-column">
-                        <div class="card-icon">💳</div>
-                        <h5 class="card-title">Credit Cards</h5>
-                        <p class="card-description">Manage credit card accounts, track balances, and monitor payment schedules securely.</p>
-                        <div class="mt-auto">
-                            <a href="/creditcards/" class="btn btn-secondary btn-app">
-                                <i class="bi bi-credit-card me-2"></i>Manage Cards
-                            </a>
-                        </div>
-                    </div>
-                </div>
+<!-- FamilyHub Dashboard -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center text-white mb-4">🏠 FamilyHub Dashboard</h1>
+            <div class="alert alert-success text-center">
+                <h4>✅ Template System Working!</h4>
+                <p>Server: Running | Templates: Loading | Base: Connected</p>
+                <a href="/home/debug/" class="btn btn-info btn-sm">🔧 Debug Dashboard</a>
             </div>
         </div>
     </div>
+    
+    <!-- App Cards Grid -->
+    <div class="row g-4">
+        {% for app in apps %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow">
+                <div class="card-body text-center">
+                    <div style="font-size: 3rem;">{{ app.icon }}</div>
+                    <h5 class="card-title">{{ app.name }}</h5>
+                    <p class="card-text">{{ app.description }}</p>
+                    <a href="{{ app.url }}" class="btn btn-{{ app.color }}">
+                        Open {{ app.name }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                <h4>⚠️ No Apps Data Found</h4>
+                <p>The apps list from views.py is not reaching the template.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Debug Information -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <small class="text-white-50">
+                Branch: feature/visual-debug-info | 
+                Django: {{ settings.DEBUG|yesno:"Debug Mode,Production Mode" }} |
+                Apps Count: {{ apps|length }}
+            </small>
+        </div>
+    </div>
+</div>
 {% endblock %}

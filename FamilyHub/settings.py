@@ -40,15 +40,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # FamilyHub main dashboard
-    'home',  # or 'familydash' if you chose that name
+    'home',
     
-    # Standalone apps (will work with or without symbolic links)
-    'timesheet_app',
-    'daycare_invoice_app',
-    'employment_history_app',
-    'upcoming_payments_app',
-    'credit_card_mgmt_app',
-    'household_budget_app',
+    # Integrated apps (in the apps directory) - commented out until properly configured
+    # 'apps.timesheet_app',
+    # 'apps.daycare_invoice_app',
+    # 'apps.employment_history_app',
+    # 'apps.upcoming_payments_app',
+    # 'apps.credit_card_mgmt_app',
+    # 'household_budget_app',
 ]
 
 MIDDLEWARE = [

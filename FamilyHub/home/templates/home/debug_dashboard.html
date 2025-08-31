@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}FamilyHub - Visual Debug Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <!-- Debug Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h4><i class="bi bi-bug"></i> FamilyHub Visual Debug Dashboard</h4>
+                <p class="mb-1"><strong>Branch:</strong> feature/visual-debug-info</p>
+                <p class="mb-1"><strong>Environment:</strong> Local Development</p>
+                <p class="mb-0"><strong>Status:</strong> Template system working correctly</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Info -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="bi bi-file-earmark-code"></i> Template Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><strong>Current Template:</strong> home/dashboard.html</li>
+                        <li><strong>Extends:</strong> base.html</li>
+                        <li><strong>Template Dirs:</strong></li>
+                        <ul>
+                            {% if settings.TEMPLATES %}
+                                {% for dir in settings.TEMPLATES.0.DIRS %}
+                                <li><code>{{ dir }}</code></li>
+                                {% empty %}
+                                <li><em>No custom template directories</em></li>
+                                {% endfor %}
+                            {% else %}
+                            <li><em>Template settings not available</em></li>
+                            {% endif %}
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="bi bi-gear"></i> Django Settings</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><strong>Settings Module:</strong> {{ settings.SETTINGS_MODULE }}</li>
+                        <li><strong>Debug Mode:</strong> {{ settings.DEBUG }}</li>
+                        <li><strong>Django Version:</strong> {{ settings|length }} settings loaded</li>
+                        <li><strong>Database:</strong> SQLite (local)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apps Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="bi bi-app-indicator"></i> Installed Apps Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>✅ Active Apps:</h6>
+                            <ul>
+                                {% for app in settings.INSTALLED_APPS %}
+                                <li><code>{{ app }}</code></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>📋 Available App Cards:</h6>
+                            <ul>
+                                {% for app in apps %}
+                                <li>{{ app.icon }} <strong>{{ app.name }}</strong> - {{ app.color }}</li>
+                                {% empty %}
+                                <li class="text-danger">⚠️ No app cards data found from views.py</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual App Cards (if data available) -->
+    {% if apps %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4><i class="bi bi-grid-3x3-gap"></i> App Cards Preview</h4>
+        </div>
+        {% for app in apps %}
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card h-100 shadow border-{{ app.color }}">
+                <div class="card-body text-center">
+                    <div style="font-size: 3rem;">{{ app.icon }}</div>
+                    <h5 class="card-title">{{ app.name }}</h5>
+                    <p class="card-text">{{ app.description }}</p>
+                    <a href="{{ app.url }}" class="btn btn-{{ app.color }}" onclick="return false;">
+                        <i class="bi bi-{{ app.color }}"></i> {{ app.name }}
+                    </a>
+                    <small class="d-block mt-2 text-muted">URL: {{ app.url }}</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- File Structure Debug -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h5><i class="bi bi-folder"></i> Template File Structure</h5>
+                </div>
+                <div class="card-body">
+                    <pre><code>FamilyHub/
+├── templates/
+│   ├── base.html                    ✅ ACTIVE
+│   └── timesheet/
+│       └── base.html                ❌ DUPLICATE (ignored)
+├── home/
+│   └── templates/
+│       └── home/
+│           └── dashboard.html       ✅ ACTIVE
+└── apps/
+    ├── timesheet_app/               ⚠️ COMMENTED OUT
+    ├── daycare_invoice_app/         ⚠️ COMMENTED OUT
+    └── ...                          ⚠️ COMMENTED OUT</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="/" class="btn btn-primary me-2">
+                <i class="bi bi-house"></i> Regular Dashboard
+            </a>
+            <a href="/admin/" class="btn btn-secondary me-2" target="_blank">
+                <i class="bi bi-gear"></i> Django Admin
+            </a>
+            <a href="/home/health/" class="btn btn-success" target="_blank">
+                <i class="bi bi-heart-pulse"></i> Health Check
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
