@@ -19,24 +19,32 @@
     
     <!-- App Cards Grid -->
     <div class="row g-4">
-        {% for app in familyhub_apps %}
+        {% for app in apps %}
+        {% if app.available %}
         <div class="col-lg-4 col-md-6">
             <div class="card h-100 shadow">
                 <div class="card-body text-center">
                     <div style="font-size: 3rem;">{{ app.icon }}</div>
                     <h5 class="card-title">{{ app.name }}</h5>
                     <p class="card-text">{{ app.description }}</p>
+                    {% if app.url %}
                     <a href="{{ app.url }}" class="btn btn-{{ app.color }}">
                         Open {{ app.name }}
                     </a>
+                    {% else %}
+                    <button class="btn btn-{{ app.color }} disabled">
+                        {{ app.name }} (Not Ready)
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
+        {% endif %}
         {% empty %}
         <div class="col-12">
             <div class="alert alert-warning text-center">
-                <h4>⚠️ No Apps Data Found</h4>
-                <p>The apps list from views.py is not reaching the template.</p>
+                <h4>⚠️ No Apps Available</h4>
+                <p>No integrated apps are currently available. Please check the app registry.</p>
             </div>
         </div>
         {% endfor %}

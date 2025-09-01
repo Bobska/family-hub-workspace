@@ -120,6 +120,66 @@ class FamilyHubAppsRegistry:
         """Get applications that are integrated into FamilyHub"""
         return [app for app in self._apps.values() if app.is_integrated]
     
+    def get_available_apps(self) -> List[AppConfig]:
+        """Get applications that are actually available (have implementation)"""
+        import os
+        from pathlib import Path
+        
+        available_apps = []
+        
+        for app in self.get_active_apps():
+            # Check if app has actual implementation
+            app_path = Path(f"apps/{app.slug}_app")
+            
+            # An app is considered available if it has models.py with content
+            models_file = app_path / "models.py"
+            if models_file.exists():
+                try:
+                    content = models_file.read_text(encoding='utf-8')
+                    # Check if models.py has substantial content (not just imports/comments)
+                    lines = [line.strip() for line in content.split('\n') if line.strip() and not line.strip().startswith('#')]
+                    if len(lines) > 5:  # Has more than just basic imports
+                        # Mark as available and integrated if it has real content
+                        app.is_integrated = True
+                        available_apps.append(app)
+                except:
+                    continue
+                    
+        return available_apps
+
+    def get_dashboard_data(self) -> List[Dict[str, Any]]:
+        """Get dashboard data showing only available apps"""
+        available_apps = self.get_available_apps()
+        
+        return [
+            {
+                'name': app.name,
+                'slug': app.slug,
+                'icon': app.icon,
+                'description': app.description,
+                'url': app.url,
+                'color': app.color,
+                'is_active': app.is_active,
+                'is_integrated': app.is_integrated,
+                'available': True,  # Only available apps are returned
+                'standalone_url': app.standalone_url,
+            }
+            for app in available_apps
+        ]
+
+    def get_all_app_statuses(self) -> List[Dict[str, Any]]:
+        """Get status of all apps for debugging"""
+        return [
+            {
+                'name': app.name,
+                'slug': app.slug,
+                'available': app in self.get_available_apps(),
+                'is_active': app.is_active,
+                'is_integrated': app.is_integrated,
+            }
+            for app in self.get_all_apps()
+        ]
+    
     def get_app(self, slug: str) -> Optional[AppConfig]:
         """Get a specific application by slug"""
         return self._apps.get(slug)
