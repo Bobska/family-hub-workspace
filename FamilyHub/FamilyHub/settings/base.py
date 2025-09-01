@@ -56,7 +56,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
-            BASE_DIR.parent / 'shared' / 'apps' / 'timesheet' / 'templates',  # Shared timesheet templates
+            # NOTE: Shared templates moved below to allow app-specific templates to override
+            # BASE_DIR.parent / 'shared' / 'apps' / 'timesheet' / 'templates',  # Shared timesheet templates (temporarily disabled for unified navigation)
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -67,6 +68,7 @@ TEMPLATES = [
                 'home.context_processors.debug_info',  # Debug widget information
                 'home.context_processors.familyhub_context',  # Local FamilyHub app info
                 'home.context_processors.app_info',  # App info for templates
+                'home.context_processors.navigation_context',  # Navigation and current app context
                 # 'apps.timesheet_integration.timesheet_context_processor',  # Temporarily disabled
             ],
         },

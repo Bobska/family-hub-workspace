@@ -42,6 +42,48 @@
             background-clip: text;
         }
         
+        /* Active state for primary navigation */
+        .navbar-nav .nav-link.active {
+            color: var(--primary) !important;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        /* Secondary Navigation (App-specific) */
+        .secondary-nav {
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+            padding: 0.5rem 0;
+        }
+        
+        .secondary-nav .nav-link {
+            color: #6c757d;
+            padding: 0.25rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0 0.25rem;
+            transition: all 0.2s ease;
+        }
+        
+        .secondary-nav .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+        }
+        
+        .secondary-nav .nav-link.active {
+            background: var(--primary-gradient);
+            color: white !important;
+        }
+        
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background: none;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: var(--primary);
+        }
+        
         /* Main Content */
         .main-content {
             background: rgba(255, 255, 255, 0.95);
@@ -78,7 +120,7 @@
     <!-- Debug Banner (only in DEBUG mode) -->
     {% template_debug_banner %}
     
-    <!-- Navigation -->
+    <!-- Primary Navigation (Always visible) -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home:dashboard' %}">
@@ -90,21 +132,26 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- App Switcher (Primary Navigation) -->
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home:dashboard' %}">
-                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    {% if IS_INTEGRATED %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'timesheet:dashboard' %}">
-                            <i class="bi bi-clock me-1"></i>Timesheet
-                        </a>
-                    </li>
-                    {% endif %}
+                    {% for app in available_apps %}
+                        {% if app.available %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if app.current %}active fw-bold{% endif %}" href="{{ app.url }}">
+                                    <i class="{{ app.icon }} me-1"></i>{{ app.name }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link text-muted" href="#" onclick="return false;">
+                                    <i class="{{ app.icon }} me-1"></i>{{ app.name }} <small>(Coming Soon)</small>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
                 </ul>
                 
+                <!-- User Menu -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
@@ -132,6 +179,10 @@
             </div>
         </div>
     </nav>
+    
+    <!-- Secondary Navigation (App-specific) -->
+    {% block app_navigation %}
+    {% endblock %}
 
     <!-- Main Content -->
     <div class="container">
@@ -143,6 +194,10 @@
                 </div>
             {% endfor %}
         {% endif %}
+        
+        <!-- Breadcrumb Navigation -->
+        {% block breadcrumb %}
+        {% endblock %}
         
         <div class="main-content p-4">
             {% block content %}

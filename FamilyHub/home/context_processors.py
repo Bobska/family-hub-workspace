@@ -115,3 +115,72 @@ def app_info(request):
             }
         }
     }
+
+
+def navigation_context(request):
+    """
+    Provide navigation context to all templates.
+    Determines current app and provides navigation data.
+    """
+    # Determine current app from URL
+    current_app = 'home'  # Default
+    path = request.path
+    
+    if path.startswith('/timesheet/'):
+        current_app = 'timesheet'
+    elif path.startswith('/budget/'):
+        current_app = 'budget'
+    elif path.startswith('/daycare/'):
+        current_app = 'daycare'
+    
+    # Define available apps with navigation data
+    available_apps = [
+        {
+            'name': 'Dashboard',
+            'slug': 'home',
+            'url': '/',
+            'icon': 'bi-speedometer2',
+            'color': 'primary',
+            'available': True,
+            'current': current_app == 'home'
+        },
+        {
+            'name': 'Timesheet',
+            'slug': 'timesheet',
+            'url': '/timesheet/',
+            'icon': 'bi-clock',
+            'color': 'primary',
+            'available': 'timesheet_app' in getattr(settings, 'INSTALLED_APPS', []),
+            'current': current_app == 'timesheet',
+            'sub_nav': [
+                {'name': 'Dashboard', 'url': 'timesheet:dashboard', 'icon': 'bi-speedometer2'},
+                {'name': 'Daily Entry', 'url': 'timesheet:daily_entry', 'icon': 'bi-plus-circle'},
+                {'name': 'Weekly Summary', 'url': 'timesheet:weekly_summary', 'icon': 'bi-calendar-week'},
+                {'name': 'Jobs', 'url': 'timesheet:job_list', 'icon': 'bi-briefcase'},
+            ] if current_app == 'timesheet' else []
+        },
+        {
+            'name': 'Budget',
+            'slug': 'budget',
+            'url': '/budget/',
+            'icon': 'bi-calculator',
+            'color': 'success',
+            'available': False,  # Coming soon
+            'current': current_app == 'budget'
+        },
+        {
+            'name': 'Daycare',
+            'slug': 'daycare',
+            'url': '/daycare/',
+            'icon': 'bi-receipt',
+            'color': 'info',
+            'available': False,  # Coming soon
+            'current': current_app == 'daycare'
+        }
+    ]
+    
+    return {
+        'current_app': current_app,
+        'available_apps': available_apps,
+        'current_app_data': next((app for app in available_apps if app['current']), available_apps[0])
+    }
