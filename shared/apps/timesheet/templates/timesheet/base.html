@@ -1,3 +1,4 @@
+{% load timesheet_debug_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -113,6 +114,9 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
     
+    <!-- Debug Banner (only in DEBUG mode) -->
+    {% template_debug_banner %}
+    
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
         <div class="container">
@@ -212,6 +216,10 @@
                 <i class="fas fa-clock me-1"></i>
                 Timesheet App &copy; {% now "Y" %} | 
                 Built with Django & Bootstrap
+                <!-- Debug context in footer -->
+                {% if debug %}
+                    | {% debug_context %}
+                {% endif %}
             </small>
         </div>
     </footer>
