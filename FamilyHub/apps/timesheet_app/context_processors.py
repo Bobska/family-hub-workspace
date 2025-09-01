@@ -1,6 +1,6 @@
 """
 Debug Context Processor for Standalone Timesheet App
-Provides debug information for the visual debug widget
+Provides debug information for the visual debug widget and integration context
 """
 
 import os
@@ -8,6 +8,30 @@ import sys
 from django.conf import settings
 from django.db import connection
 from django.apps import apps
+
+
+def integration_context(request):
+    """
+    Provides integration context to all templates.
+    
+    This context processor automatically detects whether the app is running
+    in standalone mode or integrated with FamilyHub and makes this information
+    available to all templates.
+    
+    Returns:
+        dict: Context variables for integration mode detection
+    """
+    # Detect integration mode based on settings
+    integrated_mode = (
+        hasattr(settings, 'IS_STANDALONE') and not settings.IS_STANDALONE
+    ) or (
+        'apps.timesheet_app' in settings.INSTALLED_APPS
+    )
+    
+    return {
+        'integrated_mode': integrated_mode,
+        'standalone_mode': not integrated_mode,
+    }
 
 
 def debug_info(request):
@@ -76,3 +100,36 @@ def debug_info(request):
                 'system': {'base_dir': 'Error loading'},
             }
         }
+
+
+def deployment_context(request):
+    """
+    Context processor that provides deployment information for standalone mode
+    """
+    if not getattr(settings, 'DEBUG', False):
+        return {}
+    
+    return {
+        'deployment_info': {
+            'mode': 'standalone',
+            'port': 8001,
+            'app_name': 'Timesheet Standalone',
+            'theme': 'orange',
+            'architecture': 'Independent Django App'
+        }
+    }
+
+
+def app_info(request):
+    """
+    Context processor that provides app information for templates
+    Local implementation for standalone mode - no shared imports
+    """
+    return {
+        'app_info': {
+            'name': 'Timesheet (Standalone)',
+            'color': '#ff6b35',  # Orange for standalone
+            'mode': 'STANDALONE',
+            'port': '8001'
+        }
+    }

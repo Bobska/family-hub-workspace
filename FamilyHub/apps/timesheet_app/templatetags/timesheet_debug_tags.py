@@ -1,10 +1,11 @@
 """
-Timesheet App Template Debug Tags
+Timesheet App Template Debug Tags - Standalone Mode
 
-Custom Django template tags for debugging template rendering in standalone mode.
+Custom Django template tags for debugging template rendering and displaying
+template hierarchy information in development mode for standalone timesheet app.
 
 Usage in templates:
-    {% load debug_tags %}
+    {% load timesheet_debug_tags %}
     {% template_debug_banner %}
     {% show_template_path %}
     {% template_info "custom_template_name.html" %}

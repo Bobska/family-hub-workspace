@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import debug_views
 
 app_name = 'timesheet'
 
@@ -8,6 +9,9 @@ urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('daily/', views.daily_entry, name='daily_entry'),
     path('weekly/', views.weekly_summary, name='weekly_summary'),
+    
+    # Debug views (only available in DEBUG mode)
+    path('debug/templates/', debug_views.template_debug_showcase, name='template_debug'),
     
     # Job management
     path('jobs/', views.job_list, name='job_list'),
@@ -22,7 +26,4 @@ urlpatterns = [
     
     # AJAX endpoints
     path('api/validate-overlap/', views.validate_overlap, name='validate_overlap'),
-    
-    # Debug endpoints (only in DEBUG mode)
-    path('debug/', views.debug_showcase, name='debug_showcase'),
 ]
