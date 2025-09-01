@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Weekly Summary - Timesheet{% endblock %}
+
+{% block app_navigation %}
+    <!-- Tier 2 - App Navigation (CONTEXTUAL) -->
+    <nav class="secondary-nav">
+        <div class="container">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'timesheet:dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'timesheet:daily_entry' %}">
+                        <i class="fas fa-calendar-day me-1"></i>Daily Entry
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'timesheet:weekly_summary' %}">
+                        <i class="fas fa-calendar-week me-1"></i>Weekly Summary
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'timesheet:job_list' %}">
+                        <i class="fas fa-briefcase me-1"></i>Jobs
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block breadcrumb %}
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="bg-light border-bottom">
+        <div class="container">
+            <ol class="breadcrumb mb-0 py-2">
+                <li class="breadcrumb-item">
+                    <a href="/">🏠 FamilyHub</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'timesheet:dashboard' %}">⏰ Timesheet</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    📊 Weekly Summary
+                </li>
+            </ol>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .day-card {
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+    }
+    .day-card .card-body {
+        flex-grow: 1;
+        overflow-y: auto;
+        max-height: 200px;
+    }
+    
+    /* Enhanced styling for weekdays vs weekends */
+    .weekend-card {
+        background-color: #f8f9fa;
+        border: 2px solid #6c757d;
+    }
+    .weekday-card {
+        background-color: #ffffff;
+        border: 2px solid #0d6efd;
+    }
+    
+    .day-column {
+        margin-bottom: 1rem;
+    }
+    
+    .row .day-column .day-card {
+        height: 100%;
+    }
+    
+    .time-entry {
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+    }
+    
+    .time-entry .job-name {
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    
+    .time-entry .time-details {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .time-entry .duration {
+        font-weight: 600;
+        color: #198754;
+    }
+    
+    .today-highlight {
+        border: 3px solid #ffc107 !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h2">
+                    <i class="fas fa-calendar-week me-2 text-primary"></i>Weekly Summary
+                </h1>
+                <p class="text-muted">{{ week_start|date:"F j" }} - {{ week_end|date:"F j, Y" }}</p>
+            </div>
+            <div>
+                <a href="{% url 'timesheet:dashboard' %}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+                <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-calendar-day me-1"></i>Daily Entry
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Week Navigation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <a href="{% url 'timesheet:weekly_summary' %}?year={{ prev_year }}&week={{ prev_week }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-left me-1"></i>Previous Week
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h5 class="mb-0">
+                            {{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}
+                        </h5>
+                        <small class="text-muted">
+                            Week {{ current_week }}, {{ current_year }} | 
+                            Total: {{ weekly_total|floatformat:2 }} hours |
+                            Days worked: {{ days_worked }} | 
+                            Entries: {{ total_entries }}
+                        </small>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        {% if show_next %}
+                            <a href="{% url 'timesheet:weekly_summary' %}?year={{ next_year }}&week={{ next_week }}" 
+                               class="btn btn-outline-primary">
+                                Next Week<i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        {% else %}
+                            <button class="btn btn-outline-secondary" disabled>
+                                Next Week<i class="fas fa-chevron-right ms-1"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Weekly Overview Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h4>{{ weekly_total|floatformat:2 }}</h4>
+                <p class="mb-0">Total Hours</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                <h4>{{ days_worked }}</h4>
+                <p class="mb-0">Days Worked</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-list fa-2x mb-2"></i>
+                <h4>{{ total_entries }}</h4>
+                <p class="mb-0">Total Entries</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-calculator fa-2x mb-2"></i>
+                <h4>{{ daily_average }}</h4>
+                <p class="mb-0">Avg Hours/Day</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Daily Breakdown -->
+<!-- Weekdays (Monday - Friday) -->
+<div class="row mb-3">
+    <div class="col-12">
+        <h5 class="mb-3">
+            <i class="fas fa-briefcase me-2 text-primary"></i>Weekdays
+        </h5>
+    </div>
+    {% for day in week_data %}
+        {% if day.weekday < 5 %}
+            <div class="col-lg day-column">
+                <div class="card day-card h-100 weekday-card {% if day.is_today %}today-highlight{% endif %}">
+                    <div class="card-header {% if day.is_today %}bg-warning text-dark{% else %}bg-primary text-white{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong>{{ day.day_name }}{% if day.is_today %} (Today){% endif %}</strong>
+                                <br><small>{{ day.date|date:"d/m" }}</small>
+                            </span>
+                            <span class="badge {% if day.is_today %}bg-dark{% else %}bg-light{% endif %} {% if day.is_today %}text-white{% else %}text-dark{% endif %}">
+                                {{ day.total|floatformat:2 }}h
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if day.entries %}
+                            {% for entry in day.entries %}
+                                <div class="entry-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>{{ entry.job.name }}</strong>
+                                            <br><small class="text-muted">
+                                                {{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}
+                                                {% if entry.break_duration > 0 %}
+                                                    ({{ entry.get_break_duration_display }})
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="total-hours">{{ entry.total_hours|floatformat:2 }}h</small>
+                                            <br>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'timesheet:entry_edit' entry.pk %}" 
+                                                   class="btn btn-outline-primary btn-sm" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                <br><small>No entries</small>
+                                <br>
+                                <a href="{% url 'timesheet:daily_entry' %}?date={{ day.date|date:'Y-m-d' }}" 
+                                   class="btn btn-outline-primary btn-sm mt-2">
+                                    <i class="fas fa-plus me-1"></i>Add Entry
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- Weekend (Saturday - Sunday) -->
+<div class="row">
+    <div class="col-12">
+        <h5 class="mb-3">
+            <i class="fas fa-home me-2 text-secondary"></i>Weekend
+        </h5>
+    </div>
+    {% for day in week_data %}
+        {% if day.weekday >= 5 %}
+            <div class="col-lg-6 col-md-6 day-column">
+                <div class="card day-card weekend-card {% if day.is_today %}today-highlight{% endif %}">
+                    <div class="card-header bg-secondary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>
+                                <strong>{{ day.day_name }}{% if day.is_today %} (Today){% endif %}</strong>
+                                <br><small>{{ day.date|date:"d/m" }}</small>
+                            </span>
+                            <span class="badge bg-light text-dark">
+                                {{ day.total|floatformat:2 }}h
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if day.entries %}
+                            {% for entry in day.entries %}
+                                <div class="entry-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>{{ entry.job.name }}</strong>
+                                            <br><small class="text-muted">
+                                                {{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}
+                                                {% if entry.break_duration > 0 %}
+                                                    ({{ entry.get_break_duration_display }})
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="total-hours">{{ entry.total_hours|floatformat:2 }}h</small>
+                                            <br>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'timesheet:entry_edit' entry.pk %}" 
+                                                   class="btn btn-outline-primary btn-sm" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                                <br><small>No entries</small>
+                                <br>
+                                <a href="{% url 'timesheet:daily_entry' %}?date={{ day.date|date:'Y-m-d' }}" 
+                                   class="btn btn-outline-primary btn-sm mt-2">
+                                    <i class="fas fa-plus me-1"></i>Add Entry
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- Weekly Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-tools me-2"></i>Weekly Actions
+                </h6>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'timesheet:weekly_summary' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-calendar-week me-1"></i>Current Week
+                    </a>
+                    <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-calendar-day me-1"></i>Add Today's Entry
+                    </a>
+                    <a href="{% url 'timesheet:job_list' %}" class="btn btn-outline-success">
+                        <i class="fas fa-briefcase me-1"></i>Manage Jobs
+                    </a>
+                    <button class="btn btn-outline-info" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i>Print Week
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add tooltips to time entries
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Highlight current week in navigation
+    document.querySelector('.btn-primary')?.classList.add('active');
+});
+</script>
+{% endblock %}
