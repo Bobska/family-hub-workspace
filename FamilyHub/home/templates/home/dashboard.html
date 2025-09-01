@@ -20,26 +20,52 @@
     <!-- App Cards Grid -->
     <div class="row g-4">
         {% for app in apps %}
-        {% if app.available %}
         <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow">
+            <div class="card h-100 shadow {% if not app.available %}opacity-75{% endif %}">
                 <div class="card-body text-center">
-                    <div style="font-size: 3rem;">{{ app.icon }}</div>
+                    <div class="app-icon {% if not app.available %}text-muted{% endif %}" style="font-size: 3rem;">{{ app.icon }}</div>
                     <h5 class="card-title">{{ app.name }}</h5>
                     <p class="card-text">{{ app.description }}</p>
-                    {% if app.url %}
-                    <a href="{{ app.url }}" class="btn btn-{{ app.color }}">
-                        Open {{ app.name }}
-                    </a>
+                    
+                    {% if app.available and app.url %}
+                        <!-- App is fully available and accessible -->
+                        <a href="{{ app.url }}" class="btn btn-{{ app.color }} w-100">
+                            <i class="fas fa-external-link-alt me-2"></i>Open {{ app.name }}
+                        </a>
+                        <small class="text-success d-block mt-2">
+                            <i class="fas fa-check-circle me-1"></i>Ready
+                        </small>
+                    {% elif app.available and not app.urls_available %}
+                        <!-- App exists but URLs not configured -->
+                        <button class="btn btn-outline-{{ app.color }} w-100" disabled>
+                            <i class="fas fa-cog me-2"></i>{{ app.name }} (Configuring...)
+                        </button>
+                        <small class="text-warning d-block mt-2">
+                            <i class="fas fa-exclamation-triangle me-1"></i>URLs being configured
+                        </small>
                     {% else %}
-                    <button class="btn btn-{{ app.color }} disabled">
-                        {{ app.name }} (Not Ready)
-                    </button>
+                        <!-- App not available -->
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="fas fa-clock me-2"></i>Coming Soon
+                        </button>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-info-circle me-1"></i>Not yet available
+                        </small>
+                    {% endif %}
+                    
+                    {% if debug %}
+                        <!-- Debug information -->
+                        <div class="mt-3 p-2 bg-light rounded">
+                            <small class="text-muted">
+                                Status: {{ app.status|default:"unknown" }}<br>
+                                Mode: {{ app.mode|default:"none" }}<br>
+                                URLs: {{ app.urls_available|yesno:"✓,✗" }}
+                            </small>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-        {% endif %}
         {% empty %}
         <div class="col-12">
             <div class="alert alert-warning text-center">

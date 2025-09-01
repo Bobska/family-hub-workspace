@@ -17,6 +17,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from django.conf import settings
+from django.urls import reverse, NoReverseMatch
+from django.apps import apps
 
 
 class AppRegistry:
@@ -34,6 +36,7 @@ class AppRegistry:
                 'color': 'primary',
                 'app_module': 'timesheet_app',
                 'standalone_project': 'timesheet_app',
+                'url_name': 'timesheet:dashboard',
                 'priority': 1,
             },
             'daycare_invoice': {
@@ -43,6 +46,7 @@ class AppRegistry:
                 'color': 'success',
                 'app_module': 'daycare_invoice_app',
                 'standalone_project': 'daycare_invoice_app',
+                'url_name': 'daycare_invoice:dashboard',
                 'priority': 2,
             },
             'employment_history': {
@@ -52,6 +56,7 @@ class AppRegistry:
                 'color': 'info',
                 'app_module': 'employment_history_app',
                 'standalone_project': 'employment_history_app',
+                'url_name': 'employment_history:dashboard',
                 'priority': 3,
             },
             'upcoming_payments': {
@@ -61,6 +66,7 @@ class AppRegistry:
                 'color': 'warning',
                 'app_module': 'upcoming_payments_app',
                 'standalone_project': 'upcoming_payments_app',
+                'url_name': 'upcoming_payments:dashboard',
                 'priority': 4,
             },
             'credit_card_mgmt': {
@@ -70,6 +76,7 @@ class AppRegistry:
                 'color': 'danger',
                 'app_module': 'credit_card_mgmt_app',
                 'standalone_project': 'credit_card_mgmt_app',
+                'url_name': 'credit_card_mgmt:dashboard',
                 'priority': 5,
             },
             'household_budget': {
@@ -79,10 +86,38 @@ class AppRegistry:
                 'color': 'secondary',
                 'app_module': 'household_budget_app',
                 'standalone_project': 'household_budget_app',
+                'url_name': 'household_budget:dashboard',
                 'priority': 6,
             },
         }
     
+    def check_url_availability(self, app_key: str, config: Dict) -> Tuple[bool, Optional[str]]:
+        """
+        Check if app URLs are properly configured and accessible.
+        Returns (is_available, resolved_url)
+        """
+        try:
+            # Import here to avoid circular imports and app registry issues
+            from django.apps import apps
+            from django.urls import reverse, NoReverseMatch
+            
+            # First check if app is in INSTALLED_APPS
+            if config['app_module'] not in [app.label for app in apps.get_app_configs()]:
+                return False, None
+            
+            # Try to reverse the URL
+            if 'url_name' in config:
+                url = reverse(config['url_name'])
+                return True, url
+            else:
+                # Fallback to basic path
+                return True, f"/{app_key}/"
+        except NoReverseMatch:
+            return False, None
+        except Exception:
+            # Any other error means URL system isn't ready or app not available
+            return False, None
+
     def get_app_status(self, app_key: str) -> Dict:
         """Get comprehensive status of an app."""
         if app_key not in self.known_apps:
@@ -115,10 +150,10 @@ class AppRegistry:
                 status['status'] = 'integrated'
                 status['mode'] = 'symlink' if status['is_symlink'] else 'copied'
                 
-                # Check for URL configuration
+                # Basic URL file check (detailed checking will be done at view time)
                 urls_file = integrated_path / 'urls.py'
-                if urls_file.exists():
-                    status['urls_available'] = True
+                status['urls_available'] = urls_file.exists()
+                status['resolved_url'] = None  # Will be resolved at view time
         
         elif status['standalone_exists']:
             # Standalone exists but not integrated
@@ -130,10 +165,9 @@ class AppRegistry:
             if models_file.exists() and models_file.stat().st_size > 100:
                 status['available'] = True
                 
-                # Check for URL configuration
-                urls_file = standalone_path / 'urls.py'
-                if urls_file.exists():
-                    status['urls_available'] = True
+                # For standalone apps, URL checking is not applicable in integrated mode
+                status['urls_available'] = False
+                status['resolved_url'] = None
         
         return status
     
@@ -225,23 +259,32 @@ class AppRegistry:
             return False
     
     def get_dashboard_data(self) -> List[Dict]:
-        """Get data for dashboard app cards."""
+        """Get data for dashboard app cards with dynamic URL resolution."""
         dashboard_apps = []
         statuses = self.get_all_app_statuses()
         
         for app_key, status in statuses.items():
             config = status['config']
+            
+            # Perform URL checking at view time when Django is fully loaded
+            urls_available = False
+            resolved_url = None
+            
+            if status['available'] and status['urls_available']:
+                urls_available, resolved_url = self.check_url_availability(app_key, config)
+            
             app_data = {
                 'key': app_key,
                 'name': config['name'],
                 'description': config['description'],
                 'icon': config['icon'],
                 'color': config['color'],
-                'available': status['available'],
+                'available': status['available'] and urls_available,
                 'status': status['status'],
                 'mode': status['mode'],
-                'url': f'/{app_key}/' if status['available'] and status['urls_available'] else None,
+                'url': resolved_url if status['available'] and urls_available else None,
                 'priority': config['priority'],
+                'urls_available': urls_available,
             }
             dashboard_apps.append(app_data)
         
