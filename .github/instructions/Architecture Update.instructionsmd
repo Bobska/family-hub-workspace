@@ -1,0 +1,342 @@
+# Copilot Instructions - STOP CREATING DUPLICATES
+
+## CRITICAL UNDERSTANDING - READ THIS FIRST
+
+### THE PROBLEM YOU KEEP CREATING
+You are creating DUPLICATE templates and code in multiple locations:
+- ❌ Creating templates in `FamilyHub/apps/timesheet_app/templates/`
+- ❌ Creating templates in `standalone-apps/timesheet/timesheet_app/templates/`
+- ❌ Creating different versions for "standalone" vs "integrated"
+
+### THE SOLUTION - ONE SOURCE OF TRUTH
+- ✅ Templates exist in ONE place: `standalone-apps/[app]/[app]_app/templates/`
+- ✅ `FamilyHub/apps/[app]_app` is a SYMBOLIC LINK, not a real directory
+- ✅ The SAME templates work in BOTH modes using conditional logic
+
+## FUNDAMENTAL ARCHITECTURE RULES
+
+### RULE 1: NEVER CREATE DUPLICATE FILES
+
+**NEVER create templates in these locations:**
+- `FamilyHub/apps/timesheet_app/templates/` ❌
+- `FamilyHub/apps/budget_app/templates/` ❌
+- `FamilyHub/apps/*/templates/` ❌
+
+**ONLY create templates here:**
+- `standalone-apps/timesheet/timesheet_app/templates/timesheet/` ✅
+- `standalone-apps/budget/budget_app/templates/budget/` ✅
+
+### RULE 2: SYMBOLIC LINKS ARE NOT REAL DIRECTORIES
+
+**Understanding Symbolic Links:**
+```
+FamilyHub/apps/timesheet_app -> ../../standalone-apps/timesheet/timesheet_app
+```
+This means:
+- `FamilyHub/apps/timesheet_app` is NOT a real directory
+- It POINTS TO `standalone-apps/timesheet/timesheet_app`
+- Any file you create in one appears in both
+- NEVER try to create different files in each location
+
+### RULE 3: TEMPLATES MUST BE CONTEXT-AWARE
+
+**WRONG - Creating two separate templates:**
+```django
+❌ standalone-apps/timesheet/timesheet_app/templates/timesheet/standalone_dashboard.html
+❌ FamilyHub/apps/timesheet_app/templates/timesheet/integrated_dashboard.html
+```
+
+**RIGHT - One template that adapts:**
+```django
+✅ standalone-apps/timesheet/timesheet_app/templates/timesheet/dashboard.html
+
+{# This ONE template works in BOTH modes #}
+{% if integrated_mode %}
+    {% extends "base.html" %}
+{% else %}
+    {% extends "timesheet/base.html" %}
+{% endif %}
+
+{% block content %}
+    {# Same content for both modes #}
+{% endblock %}
+```
+
+### RULE 4: APP STRUCTURE - EXACTLY LIKE THIS
+
+**Correct Structure:**
+```
+standalone-apps/timesheet/
+├── manage.py                         # For standalone running
+├── timesheet_project/                # Standalone project settings
+│   ├── settings.py
+│   └── urls.py
+└── timesheet_app/                    # THE APP (only one copy exists!)
+    ├── __init__.py
+    ├── models.py                     # Real models
+    ├── views.py                      # Real views  
+    ├── urls.py                       # Real URLs
+    ├── forms.py                      # Real forms
+    ├── admin.py                      # Real admin
+    ├── templates/
+    │   └── timesheet/                # App templates
+    │       ├── base.html            # App's standalone base
+    │       ├── dashboard.html       # Adaptive template
+    │       └── *.html               # All other templates
+    └── static/
+        └── timesheet/                # App static files
+            ├── css/
+            └── js/
+```
+
+**FamilyHub Integration:**
+```
+FamilyHub/
+├── apps/
+│   └── timesheet_app -> ../../standalone-apps/timesheet/timesheet_app
+│       # ↑ This is a SYMBOLIC LINK, not a real directory!
+```
+
+### RULE 5: VIEWS MUST PROVIDE CONTEXT
+
+**Every view must indicate integration mode:**
+```python
+# In timesheet_app/views.py
+def dashboard(request):
+    context = {
+        'integrated_mode': 'apps.timesheet_app' in settings.INSTALLED_APPS,
+        # ... rest of your context
+    }
+    return render(request, 'timesheet/dashboard.html', context)
+```
+
+### RULE 6: URL CONFIGURATION
+
+**App URLs (timesheet_app/urls.py):**
+```python
+app_name = 'timesheet'  # SAME namespace in both modes
+
+urlpatterns = [
+    path('', views.dashboard, name='dashboard'),
+    path('daily/', views.daily_entry, name='daily_entry'),
+    # ... other patterns
+]
+```
+
+**FamilyHub includes (FamilyHub/FamilyHub/urls.py):**
+```python
+urlpatterns = [
+    path('', include('home.urls')),
+    path('timesheet/', include('apps.timesheet_app.urls')),  # Adds prefix
+]
+```
+
+**Standalone includes (timesheet_project/urls.py):**
+```python
+urlpatterns = [
+    path('', include('timesheet_app.urls')),  # No prefix
+]
+```
+
+### RULE 7: STATIC FILES - ONE LOCATION
+
+**NEVER duplicate static files:**
+- ❌ Don't create `FamilyHub/apps/timesheet_app/static/`
+- ✅ Only use `standalone-apps/timesheet/timesheet_app/static/timesheet/`
+
+**Django will find them automatically through the symbolic link.**
+
+### RULE 8: MIGRATIONS - RUN FROM CORRECT LOCATION
+
+**During Development:**
+```bash
+# For standalone testing
+cd standalone-apps/timesheet
+python manage.py makemigrations timesheet_app
+python manage.py migrate
+
+# For integrated testing
+cd FamilyHub
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### RULE 9: IMPORTS MUST WORK IN BOTH MODES
+
+**App imports should be relative:**
+```python
+# In timesheet_app/views.py
+from .models import Job, TimeEntry  # Works in both modes
+from .forms import TimeEntryForm     # Works in both modes
+```
+
+**NEVER use absolute imports like:**
+```python
+❌ from apps.timesheet_app.models import Job
+❌ from timesheet_app.models import Job
+```
+
+### RULE 10: TEMPLATE INHERITANCE CHAIN
+
+**Integrated Mode Chain:**
+```
+FamilyHub/templates/base.html
+    └── timesheet_app/templates/timesheet/dashboard.html
+```
+
+**Standalone Mode Chain:**
+```
+timesheet_app/templates/timesheet/base.html
+    └── timesheet_app/templates/timesheet/dashboard.html
+```
+
+**The dashboard.html is THE SAME FILE in both cases!**
+
+## WHEN CREATING A NEW APP
+
+### Step 1: Create in standalone-apps ONLY
+```bash
+cd standalone-apps
+django-admin startproject new_app_project
+cd new_app_project
+python manage.py startapp new_app_app
+```
+
+### Step 2: Develop the app completely
+- Create all models, views, templates IN THE APP
+- Test it standalone
+- Make templates context-aware from the start
+
+### Step 3: Create symbolic link for integration
+```bash
+cd FamilyHub/apps
+ln -s ../../standalone-apps/new_app_project/new_app_app new_app_app
+```
+
+### Step 4: Add to FamilyHub settings
+```python
+INSTALLED_APPS = [
+    # ...
+    'apps.new_app_app',
+]
+```
+
+### Step 5: Include URLs in FamilyHub
+```python
+urlpatterns = [
+    # ...
+    path('newapp/', include('apps.new_app_app.urls')),
+]
+```
+
+## WHEN MODIFYING AN EXISTING APP
+
+### ALWAYS work in standalone-apps
+```bash
+cd standalone-apps/timesheet/timesheet_app
+# Make your changes here
+```
+
+### NEVER work in FamilyHub/apps
+```bash
+# ❌ NEVER DO THIS:
+cd FamilyHub/apps/timesheet_app  # This is just a link!
+```
+
+### Changes automatically appear in both places
+Because it's a symbolic link, changes in standalone-apps immediately appear in FamilyHub.
+
+## COMMON MISTAKES TO AVOID
+
+### Mistake 1: Creating Templates in Both Places
+**WRONG:**
+- Creating `standalone-apps/timesheet/timesheet_app/templates/timesheet/view.html`
+- AND creating `FamilyHub/apps/timesheet_app/templates/timesheet/view.html`
+
+**RIGHT:**
+- Create ONLY in `standalone-apps/timesheet/timesheet_app/templates/timesheet/view.html`
+
+### Mistake 2: Different Base Templates
+**WRONG:**
+- Using `extends "base.html"` in one version
+- Using `extends "timesheet/base.html"` in another version
+
+**RIGHT:**
+- Use conditional: `{% if integrated_mode %}...{% else %}...{% endif %}`
+
+### Mistake 3: Copying Instead of Linking
+**WRONG:**
+```bash
+cp -r standalone-apps/timesheet/timesheet_app FamilyHub/apps/
+```
+
+**RIGHT:**
+```bash
+ln -s ../../standalone-apps/timesheet/timesheet_app FamilyHub/apps/timesheet_app
+```
+
+### Mistake 4: Hard-coding Paths
+**WRONG:**
+```django
+<link href="/static/timesheet/css/style.css">
+```
+
+**RIGHT:**
+```django
+{% load static %}
+<link href="{% static 'timesheet/css/style.css' %}">
+```
+
+## DEBUGGING CHECKLIST
+
+If something isn't working:
+
+1. **Check symbolic link exists:**
+   ```bash
+   ls -la FamilyHub/apps/
+   # Should show: timesheet_app -> ../../standalone-apps/timesheet/timesheet_app
+   ```
+
+2. **Verify template location:**
+   ```bash
+   find . -name "dashboard.html"
+   # Should ONLY show: ./standalone-apps/timesheet/timesheet_app/templates/timesheet/dashboard.html
+   ```
+
+3. **Check integrated_mode context:**
+   - Add `{{ integrated_mode }}` to template
+   - Should show True when accessed via FamilyHub
+   - Should show False when accessed standalone
+
+4. **Verify INSTALLED_APPS:**
+   - FamilyHub: `'apps.timesheet_app'`
+   - Standalone: `'timesheet_app'`
+
+5. **Check URL patterns:**
+   - FamilyHub: `/timesheet/dashboard/`
+   - Standalone: `/dashboard/`
+
+## THE GOLDEN RULES
+
+1. **ONE implementation** - Never duplicate code
+2. **Symbolic links** - Not copies
+3. **Context-aware templates** - Adapt to environment
+4. **Develop in standalone** - Test in both
+5. **No manual syncing** - Changes appear automatically
+
+## FINAL WARNING
+
+**If you find yourself creating the same file in two places, STOP!**
+You're doing it wrong. There should be only ONE file that works in BOTH contexts.
+
+**Remember:**
+- `FamilyHub/apps/[app_name]` is a LINK
+- `standalone-apps/[app]/[app]_app` is the REAL location
+- Templates adapt using `integrated_mode` context
+- Same code, different context, perfect integration
+
+---
+
+**Version**: 1.0.0
+**Priority**: CRITICAL - Follow these rules exactly
+**Purpose**: Eliminate all duplication in the FamilyHub project

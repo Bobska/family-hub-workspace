@@ -1,398 +1,366 @@
 # FamilyHub Architecture Reference Document
 
-## Project Overview
+## CRITICAL CONCEPT: Single Source of Truth
 
-**Project Name**: FamilyHub  
-**Type**: Multi-Application Family Management Platform  
-**Architecture Pattern**: Hub-and-Spoke with Unified Navigation  
-**Technology Stack**: Django, Bootstrap 5, PostgreSQL/SQLite  
+### The Core Problem We're Solving
+**Duplication Issue**: Templates and code are being duplicated between:
+- `standalone-apps/timesheet/timesheet_app/` (full implementation)
+- `FamilyHub/apps/timesheet_app/` (empty stubs or duplicates)
 
-## Core Architecture Principles
+**Solution**: ONE implementation that works in BOTH contexts through symbolic links or intelligent imports.
 
-### 1. Hub-and-Spoke Model
-- **Hub**: Central FamilyHub dashboard acts as the main entry point
-- **Spokes**: Individual applications (Timesheet, Budget, Daycare, etc.)
-- **Integration**: Apps can run standalone OR integrated within FamilyHub
-- **Data Sharing**: Shared user authentication, optional cross-app data access
+## Architecture Foundation
 
-### 2. Template Inheritance Hierarchy
-```
-FamilyHub/templates/base.html (Master Template)
-    ├── FamilyHub/templates/app_base.html (App Container Template)
-    │   ├── apps/timesheet/templates/timesheet/base.html
-    │   ├── apps/budget/templates/budget/base.html
-    │   └── apps/daycare/templates/daycare/base.html
-    └── FamilyHub/home/templates/home/dashboard.html
-```
+### 1. Application Dual-Mode Strategy
 
-### 3. Navigation Architecture
+Each app has **ONE codebase** that can run in **TWO modes**:
 
-#### Two-Tier Navigation System
-- **Tier 1 - Global Navigation** (Always Visible)
-  - FamilyHub brand/logo (links to main dashboard)
-  - App switcher (horizontal tabs or dropdown)
-  - User account menu (profile, settings, logout)
-  - Notification bell (future feature)
+#### Standalone Mode
+- Location: `standalone-apps/[app-name]/[app-name]_app/`
+- Has its own Django project wrapper for independent development
+- Uses its own base template for standalone operation
+- Runs on separate port (8001, 8002, etc.)
+- Complete, self-contained functionality
 
-- **Tier 2 - App Navigation** (Context-Sensitive)
-  - Visible only when inside an app
-  - App-specific menu items
-  - Subordinate to global navigation
-  - Maintains app context
+#### Integrated Mode
+- Location: `FamilyHub/apps/[app-name]_app/` (SYMBOLIC LINK to standalone)
+- NOT a copy - links to the standalone implementation
+- Templates detect integration and extend FamilyHub base
+- Runs as part of FamilyHub on port 8000
+- Same code, different context
 
-#### Navigation State Management
-- Active app highlighting in global nav
-- Active page highlighting in app nav
-- Breadcrumb trail for deep navigation
-- Mobile-responsive hamburger menu
+### 2. Directory Structure - The Truth
 
-### 4. URL Structure Convention
-
-```
-/                                   # FamilyHub main dashboard
-/accounts/login/                    # Authentication
-/accounts/logout/                   
-/accounts/profile/                  
-
-/timesheet/                         # Timesheet dashboard
-/timesheet/entries/daily/           # Daily entries
-/timesheet/entries/weekly/          # Weekly summary
-/timesheet/jobs/                    # Job management
-/timesheet/jobs/add/               
-/timesheet/jobs/<id>/edit/         
-
-/budget/                            # Budget dashboard
-/budget/transactions/               # Transaction list
-/budget/categories/                 # Category management
-/budget/reports/                    # Financial reports
-
-/daycare/                           # Daycare dashboard
-/daycare/invoices/                  # Invoice list
-/daycare/payments/                  # Payment tracking
-/daycare/providers/                 # Provider management
-```
-
-### 5. Application Structure
-
-#### Directory Organization
 ```
 family-hub-workspace/
-├── FamilyHub/                      # Main hub project
-│   ├── FamilyHub/                  # Project configuration
-│   │   ├── settings.py            
-│   │   ├── urls.py                # Root URL configuration
-│   │   └── wsgi.py
-│   ├── home/                       # Dashboard application
-│   ├── apps/                       # Integrated applications
-│   │   ├── timesheet_app/         
-│   │   ├── budget_app/            
-│   │   └── daycare_app/           
-│   ├── templates/                  # Global templates
-│   │   ├── base.html              # Master base template
-│   │   └── app_base.html          # App container template
-│   ├── static/                     # Global static files
-│   │   ├── css/                   
-│   │   │   └── familyhub.css     # Global styles
-│   │   ├── js/                    
-│   │   │   └── familyhub.js      # Global JavaScript
-│   │   └── img/                   # Global images/icons
-│   └── media/                      # User uploads
-└── standalone-apps/                # Standalone versions
-    ├── timesheet/                  
-    ├── budget/                     
-    └── daycare/                    
+├── FamilyHub/                           # Main integrated platform
+│   ├── FamilyHub/                       # Django settings directory
+│   │   ├── settings.py                  # Main configuration
+│   │   └── urls.py                      # Root URL config
+│   ├── home/                            # Dashboard app (native to FamilyHub)
+│   │   └── templates/home/              # Dashboard templates
+│   ├── apps/                            # SYMBOLIC LINKS to standalone apps
+│   │   ├── timesheet_app -> ../../standalone-apps/timesheet/timesheet_app
+│   │   └── budget_app -> ../../standalone-apps/budget/budget_app
+│   ├── templates/                       # Global templates
+│   │   └── base.html                    # Master base template
+│   └── static/                          # Global static files
+│
+└── standalone-apps/                     # Independent app development
+    ├── timesheet/                       # Timesheet project wrapper
+    │   ├── manage.py                    # For standalone running
+    │   ├── timesheet_project/           # Project settings for standalone
+    │   └── timesheet_app/               # THE ACTUAL APP (single source)
+    │       ├── models.py                # Real implementation
+    │       ├── views.py                 # Real implementation
+    │       ├── urls.py                  # Real implementation
+    │       └── templates/               # App templates
+    │           └── timesheet/           
+    │               └── *.html           # Templates that adapt
+    └── budget/                          # Same structure
 ```
 
-### 6. Design System Architecture
+### 3. Template Inheritance Strategy - NO DUPLICATION
 
-#### Visual Hierarchy
-- **Primary Brand Color**: Gradient (#667eea to #764ba2)
-- **Typography Scale**: Consistent font sizes (12, 14, 16, 18, 24, 32px)
-- **Spacing System**: 4px base unit (4, 8, 16, 24, 32, 48px)
-- **Component Library**: Bootstrap 5 with custom overrides
+#### The Smart Template Pattern
 
-#### CSS Architecture
-- **Global Styles**: `FamilyHub/static/css/familyhub.css`
-- **App-Specific Styles**: `apps/[app_name]/static/[app_name]/css/app.css`
-- **CSS Variables**: Design tokens for consistency
-- **Mobile-First**: Responsive breakpoints (576px, 768px, 992px, 1200px)
+Each app template uses conditional inheritance:
 
-### 7. Data Architecture
+```django
+{# timesheet_app/templates/timesheet/dashboard.html #}
+{% if integrated_mode %}
+    {% extends "base.html" %}  {# FamilyHub base #}
+{% else %}
+    {% extends "timesheet/standalone_base.html" %}  {# Standalone base #}
+{% endif %}
 
-#### User Model
-- Django's built-in User model
-- Extended with UserProfile for additional fields
-- Single sign-on across all apps
-
-#### App Data Isolation
-- Each app manages its own models
-- Foreign keys to User for ownership
-- Optional cross-app relationships through interfaces
-
-#### Database Strategy
-- Development: SQLite
-- Production: PostgreSQL
-- Migrations: Managed per app
-- Backup: Daily automated backups
-
-### 8. Integration Patterns
-
-#### App Registration
-- Apps register themselves with FamilyHub
-- Provide metadata (name, icon, description, color)
-- Define navigation menu items
-- Specify required permissions
-
-#### Context Processors
-- `familyhub_context`: Provides global navigation data
-- `app_context`: Provides current app information
-- `user_context`: Provides user preferences and permissions
-
-#### Middleware
-- `AppDetectionMiddleware`: Identifies current app from URL
-- `NavigationMiddleware`: Builds navigation structure
-- `ThemeMiddleware`: Handles user theme preferences
-
-### 9. Authentication & Authorization
-
-#### Authentication Flow
-- Centralized login/logout
-- Session-based authentication
-- Optional "Remember Me" functionality
-- Password reset via email
-
-#### Authorization Levels
-- **Superuser**: Full system access
-- **Staff**: Admin panel access
-- **App-specific roles**: Defined per application
-- **Family sharing**: Future feature for multi-user families
-
-### 10. Deployment Architecture
-
-#### Development Environment
-- Local Django development server
-- SQLite database
-- Debug mode enabled
-- Hot reload for templates/static files
-
-#### Production Environment
-- Docker containerization
-- Nginx reverse proxy
-- Gunicorn WSGI server
-- PostgreSQL database
-- Static files served by Nginx
-- Media files in persistent volume
-
-#### Docker Structure
-```
-services:
-  - familyhub (Django application)
-  - postgres (Database)
-  - nginx (Web server)
-  - redis (Cache - future)
+{% block content %}
+    {# Same content for both modes #}
+{% endblock %}
 ```
 
-### 11. Static File Management
+#### Template Locations (NO DUPLICATION)
+- **App templates**: `standalone-apps/[app]/[app]_app/templates/[app]/`
+- **FamilyHub base**: `FamilyHub/templates/base.html`
+- **Standalone base**: Within each app's template directory
+- **NEVER**: Create templates in `FamilyHub/apps/` - they're symbolic links
 
-#### Collection Strategy
-- Global static files in `FamilyHub/static/`
-- App static files in `apps/[app_name]/static/[app_name]/`
-- Collected to `STATIC_ROOT` for production
-- Served by Nginx in production
+### 4. How Integration Actually Works
 
-#### Media File Handling
-- User uploads to `MEDIA_ROOT`
-- Organized by app and date
-- Backup strategy for user data
-- CDN integration (future)
+#### Step 1: Create Symbolic Link
+```bash
+cd FamilyHub/apps/
+ln -s ../../standalone-apps/timesheet/timesheet_app timesheet_app
+```
 
-### 12. Template Block Structure
+#### Step 2: App Detects Context
+Views pass `integrated_mode` context variable:
+```python
+def dashboard(request):
+    context = {
+        'integrated_mode': 'familyhub' in request.resolver_match.app_name,
+        # ... other context
+    }
+    return render(request, 'timesheet/dashboard.html', context)
+```
 
-#### Master Base Template Blocks
-- `{% block title %}` - Page title
-- `{% block extra_css %}` - Additional CSS
-- `{% block navigation %}` - Navigation area
-- `{% block app_navigation %}` - App-specific navigation
-- `{% block breadcrumb %}` - Breadcrumb trail
-- `{% block content %}` - Main content area
-- `{% block extra_js %}` - Additional JavaScript
+#### Step 3: Template Adapts
+Template extends appropriate base based on context.
 
-### 13. JavaScript Architecture
+#### Step 4: URLs Include
+FamilyHub includes app URLs:
+```python
+urlpatterns = [
+    path('timesheet/', include('apps.timesheet_app.urls')),
+]
+```
 
-#### Module Structure
-- Global utilities in `familyhub.js`
-- App-specific code in app directories
-- Event-driven architecture
-- AJAX for dynamic updates
+### 5. Static Files Strategy
 
-#### Third-party Libraries
-- Bootstrap 5 JavaScript
-- Bootstrap Icons
-- Font Awesome (optional)
-- Chart.js (for dashboards)
+#### App Static Files (Single Location)
+- Location: `standalone-apps/[app]/[app]_app/static/[app]/`
+- Collected by Django's collectstatic
+- Same files used in both modes
 
-### 14. API Architecture (Future)
+#### Global Static Files
+- Location: `FamilyHub/static/`
+- Contains FamilyHub-specific styles
+- Apps reference these when integrated
 
-#### RESTful Endpoints
-- `/api/v1/` - API root
-- `/api/v1/apps/` - Available applications
-- `/api/v1/[app_name]/` - App-specific endpoints
+### 6. Settings Configuration
 
-#### Authentication
-- Token-based for API access
-- Session-based for web interface
-- OAuth2 for third-party integrations (future)
+#### FamilyHub Settings
+```python
+INSTALLED_APPS = [
+    # ...
+    'apps.timesheet_app',  # Points to symbolic link
+]
 
-### 15. Testing Architecture
+# Add standalone apps to Python path for imports
+import sys
+sys.path.insert(0, str(BASE_DIR / 'apps'))
+```
 
-#### Test Levels
-- Unit tests per app
-- Integration tests for app interactions
-- End-to-end tests for user flows
-- Performance tests for scalability
+#### Standalone Settings
+```python
+INSTALLED_APPS = [
+    # ...
+    'timesheet_app',  # Direct reference
+]
+```
 
-#### Test Organization
-- Tests located in `apps/[app_name]/tests/`
-- Shared test utilities in `FamilyHub/tests/`
-- Fixtures for test data
-- CI/CD integration
+### 7. URL Namespace Strategy
 
-### 16. Documentation Structure
+#### App URLs Define Namespace
+```python
+# timesheet_app/urls.py
+app_name = 'timesheet'  # Same in both modes
 
-#### Code Documentation
-- Docstrings for all classes and methods
-- Type hints for function parameters
-- Inline comments for complex logic
+urlpatterns = [
+    path('', views.dashboard, name='dashboard'),
+    # ...
+]
+```
 
-#### User Documentation
-- README.md in each app directory
-- User guides in `docs/user/`
-- API documentation (when implemented)
-- Architecture documentation (this document)
+#### FamilyHub Includes with Prefix
+```python
+# FamilyHub/urls.py
+urlpatterns = [
+    path('timesheet/', include('apps.timesheet_app.urls')),
+    # Results in: /timesheet/ URLs in integrated mode
+]
+```
 
-### 17. Version Control Strategy
+#### Standalone Direct Include
+```python
+# standalone-apps/timesheet/timesheet_project/urls.py
+urlpatterns = [
+    path('', include('timesheet_app.urls')),
+    # Results in: / URLs in standalone mode
+]
+```
 
-#### Branch Structure
-- `main` - Production-ready code
-- `develop` - Integration branch
-- `feature/*` - New features
-- `bugfix/*` - Bug fixes
-- `hotfix/*` - Emergency fixes
+### 8. Development Workflow
 
-#### Commit Conventions
-- Conventional commits format
-- Clear, descriptive messages
-- Reference issue numbers
-- Atomic commits
+#### Working on an App
+1. Develop in `standalone-apps/timesheet/`
+2. Run standalone: `python manage.py runserver 8001`
+3. Test in isolation
+4. Changes automatically reflected in FamilyHub (symbolic link)
+5. Test integrated: Run FamilyHub on port 8000
 
-### 18. Performance Considerations
+#### Adding New App
+1. Create in `standalone-apps/new_app/`
+2. Develop and test standalone
+3. Create symbolic link in `FamilyHub/apps/`
+4. Add to FamilyHub's INSTALLED_APPS
+5. Include URLs in FamilyHub
 
-#### Optimization Strategies
-- Database query optimization (select_related, prefetch_related)
-- Template caching for static content
-- Static file minification
-- Lazy loading for images
-- Pagination for large datasets
+### 9. Migration Strategy
 
-#### Monitoring
-- Application performance monitoring
-- Error tracking and logging
-- User analytics (privacy-conscious)
-- Database query analysis
+#### Development
+- Run migrations from app's standalone directory during development
+- Run from FamilyHub after integration
 
-### 19. Security Architecture
+#### Production
+- All migrations run from FamilyHub
+- Single database for all integrated apps
 
-#### Security Measures
-- CSRF protection on all forms
-- XSS prevention through template escaping
-- SQL injection prevention via ORM
-- Secure password hashing
-- HTTPS enforcement in production
-- Regular security updates
+### 10. Context Processors
 
-#### Data Protection
-- User data encryption at rest
-- Secure session management
-- Personal data anonymization
-- GDPR compliance considerations
+#### Integration Detection
+```python
+def integration_context(request):
+    """Provides integration context to all templates"""
+    return {
+        'integrated_mode': 'FamilyHub' in settings.ROOT_URLCONF,
+        'familyhub_nav': True if 'FamilyHub' in settings.ROOT_URLCONF else False,
+    }
+```
 
-### 20. Scalability Considerations
+### 11. Docker Considerations
 
-#### Horizontal Scaling
-- Stateless application design
-- Session storage in cache (Redis)
-- Database read replicas
-- Load balancing ready
+#### Symbolic Links in Docker
+```dockerfile
+# Create symbolic links in Dockerfile
+RUN ln -s /app/standalone-apps/timesheet/timesheet_app /app/FamilyHub/apps/timesheet_app
+```
 
-#### Vertical Scaling
-- Resource monitoring
-- Database optimization
-- Caching strategies
-- CDN for static assets
+#### Volume Mounts for Development
+```yaml
+volumes:
+  - ./standalone-apps:/app/standalone-apps
+  - ./FamilyHub:/app/FamilyHub
+```
 
-## Architecture Decision Records (ADRs)
+### 12. Testing Strategy
 
-### ADR-001: Hub-and-Spoke Architecture
-**Decision**: Use hub-and-spoke pattern for app integration
-**Rationale**: Allows apps to function independently while providing unified experience
-**Consequences**: More complex navigation but better modularity
+#### Standalone Tests
+```bash
+cd standalone-apps/timesheet
+python manage.py test timesheet_app
+```
 
-### ADR-002: Template Inheritance Strategy
-**Decision**: Three-level template hierarchy
-**Rationale**: Provides flexibility while maintaining consistency
-**Consequences**: Clear separation of concerns, easier maintenance
+#### Integration Tests
+```bash
+cd FamilyHub
+python manage.py test apps.timesheet_app
+```
 
-### ADR-003: Two-Tier Navigation
-**Decision**: Implement global and app-specific navigation layers
-**Rationale**: Users need context at both platform and app levels
-**Consequences**: More complex navigation but better user orientation
+### 13. Common Pitfalls to Avoid
 
-### ADR-004: CSS Design Tokens
-**Decision**: Use CSS variables for design system
-**Rationale**: Single source of truth for styling
-**Consequences**: Easier theme management and consistency
+#### NEVER DO:
+1. Copy app code to FamilyHub/apps/ - use symbolic links
+2. Create templates in FamilyHub/apps/ - they live in standalone
+3. Duplicate static files - single source in standalone
+4. Hard-code paths in templates - use URL reversal
+5. Create app-specific base templates in FamilyHub
 
-### ADR-005: Django Built-in Features
-**Decision**: Maximize use of Django's built-in functionality
-**Rationale**: Reduce custom code, improve maintainability
-**Consequences**: Faster development, better stability
+#### ALWAYS DO:
+1. Develop in standalone-apps/
+2. Use symbolic links for integration
+3. Make templates context-aware
+4. Test in both modes
+5. Keep single source of truth
 
-## Maintenance Notes
+### 14. Navigation Architecture in Practice
 
-### Regular Tasks
-- Weekly dependency updates
-- Monthly security patches
-- Quarterly performance review
-- Annual architecture review
+#### Two-Tier System Implementation
+- **Tier 1**: FamilyHub navigation (in FamilyHub base.html)
+- **Tier 2**: App navigation (in app templates, conditional on integration)
 
-### Monitoring Checklist
-- Application logs
-- Error rates
-- Performance metrics
-- User feedback
-- Security alerts
+#### Navigation Visibility
+- Standalone: Only app navigation visible
+- Integrated: Both FamilyHub and app navigation visible
 
-## Future Enhancements
+### 15. Deployment Strategy
 
-### Planned Features
-- Real-time notifications
-- Mobile applications
-- API for third-party integrations
-- Advanced reporting
-- Multi-language support
-- Theme customization
-- Family sharing features
+#### Production Build
+1. Collect all apps via symbolic links
+2. Run collectstatic from FamilyHub
+3. Single deployment unit
+4. Environment variables determine mode
 
-### Technical Debt
-- Refactor legacy code
-- Improve test coverage
-- Optimize database queries
-- Update documentation
-- Standardize error handling
+### 16. Database Relationships
+
+#### Shared User Model
+- Both modes use Django's User model
+- No duplicate user systems
+- Session sharing when integrated
+
+#### App-Specific Models
+- Defined once in standalone app
+- Same models used in both modes
+- Foreign keys work identically
+
+### 17. Authentication Flow
+
+#### Standalone Mode
+- App handles its own login/logout
+- Uses Django's built-in auth
+
+#### Integrated Mode
+- FamilyHub handles authentication
+- Apps check authentication status
+- Single sign-on experience
+
+### 18. Error Handling
+
+#### App Errors
+- Handled by app's error views
+- Styled appropriately for mode
+
+#### Integration Errors
+- FamilyHub provides fallback error pages
+- Consistent error experience
+
+### 19. Performance Optimization
+
+#### Static File Serving
+- Single collection point
+- CDN-ready structure
+- Cached appropriately
+
+#### Database Queries
+- Same optimizations work in both modes
+- Shared query patterns
+
+### 20. Future Scalability
+
+#### Adding Apps
+- Simple symbolic link process
+- No code changes needed
+- Automatic integration
+
+#### Removing Apps
+- Remove symbolic link
+- Remove from INSTALLED_APPS
+- No residual code
+
+## Architecture Decision Log
+
+### Decision: Symbolic Links Over Copying
+**Rationale**: Maintains single source of truth, eliminates sync issues
+**Trade-off**: Requires filesystem support for symbolic links
+
+### Decision: Context-Aware Templates
+**Rationale**: Same templates work in both modes
+**Trade-off**: Slightly more complex template logic
+
+### Decision: Single App Implementation
+**Rationale**: No code duplication, easier maintenance
+**Trade-off**: Apps must be designed for dual-mode operation
+
+## Success Metrics
+
+1. **Zero Code Duplication**: Each app has one implementation
+2. **Seamless Integration**: Apps work identically in both modes
+3. **Developer Efficiency**: Changes reflected immediately
+4. **Maintainability**: Single point of updates
+5. **Scalability**: Easy to add/remove apps
 
 ---
 
-**Document Version**: 1.0.0  
+**Version**: 2.0.0  
 **Last Updated**: Current  
-**Status**: Active Architecture  
-**Review Cycle**: Quarterly
+**Purpose**: Eliminate duplication and confusion in app integration

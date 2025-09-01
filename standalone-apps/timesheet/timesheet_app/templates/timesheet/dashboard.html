@@ -1,13 +1,73 @@
-{% extends 'timesheet/base.html' %}
+{% if integrated_mode %}
+    {% extends "base.html" %}
+{% else %}
+    {% extends 'timesheet/base.html' %}
+{% endif %}
 
-{% block title %}Dashboard - Timesheet Standalone{% endblock %}
+{% if integrated_mode %}
+    {% block title %}Dashboard - Timesheet{% endblock %}
+{% else %}
+    {% block title %}Dashboard - Timesheet Standalone{% endblock %}
+{% endif %}
+
+{% if integrated_mode %}
+    {% block app_navigation %}
+        <!-- Tier 2 - App Navigation (CONTEXTUAL) -->
+        <nav class="secondary-nav">
+            <div class="container">
+                <ul class="nav nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'timesheet:dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'timesheet:daily_entry' %}">
+                            <i class="fas fa-calendar-day me-1"></i>Daily Entry
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'timesheet:weekly_summary' %}">
+                            <i class="fas fa-calendar-week me-1"></i>Weekly Summary
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'timesheet:job_list' %}">
+                            <i class="fas fa-briefcase me-1"></i>Jobs
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    {% endblock %}
+
+    {% block breadcrumb %}
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="bg-light border-bottom">
+            <div class="container">
+                <ol class="breadcrumb mb-0 py-2">
+                    <li class="breadcrumb-item">
+                        <a href="/">🏠 FamilyHub</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        ⏰ Timesheet Dashboard
+                    </li>
+                </ol>
+            </div>
+        </nav>
+    {% endblock %}
+{% endif %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-tachometer-alt me-2"></i>Timesheet Dashboard - test (standalone)</h2>
+                {% if integrated_mode %}
+                    <h2><i class="fas fa-tachometer-alt me-2"></i>Timesheet Dashboard</h2>
+                {% else %}
+                    <h2><i class="fas fa-tachometer-alt me-2"></i>Timesheet Dashboard - Standalone</h2>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -15,11 +75,15 @@
     <!-- Quick Stats Row -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card bg-warning text-dark">
+            {% if integrated_mode %}
+                <div class="card bg-primary text-white">
+            {% else %}
+                <div class="card bg-warning text-dark">
+            {% endif %}
                 <div class="card-body text-center">
                     <i class="fas fa-clock fa-2x mb-2"></i>
                     <h5>Today's Hours</h5>
-                    <h3>0.0</h3>
+                    <h3>{{ today_total|floatformat:1 }}</h3>
                 </div>
             </div>
         </div>
@@ -42,7 +106,11 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
+            {% if integrated_mode %}
+                <div class="card bg-secondary text-white">
+            {% else %}
+                <div class="card bg-primary text-white">
+            {% endif %}
                 <div class="card-body text-center">
                     <i class="fas fa-calendar-month fa-2x mb-2"></i>
                     <h5>This Month</h5>
@@ -52,7 +120,8 @@
         </div>
     </div>
 
-    <!-- Architecture Info Panel -->
+    <!-- Architecture Info Panel - Only show in standalone mode -->
+    {% if standalone_mode %}
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-warning">
@@ -86,6 +155,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Quick Actions -->
     <div class="row">
@@ -96,15 +166,27 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-warning btn-lg">
-                            <i class="fas fa-clock me-2"></i>Log Time Entry
-                        </a>
-                        <a href="{% url 'timesheet:job_list' %}" class="btn btn-outline-warning">
-                            <i class="fas fa-briefcase me-2"></i>Manage Jobs
-                        </a>
-                        <a href="{% url 'timesheet:weekly_summary' %}" class="btn btn-outline-info">
-                            <i class="fas fa-chart-bar me-2"></i>View Reports
-                        </a>
+                        {% if integrated_mode %}
+                            <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-clock me-2"></i>Log Time Entry
+                            </a>
+                            <a href="{% url 'timesheet:job_list' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-briefcase me-2"></i>Manage Jobs
+                            </a>
+                            <a href="{% url 'timesheet:weekly_summary' %}" class="btn btn-outline-info">
+                                <i class="fas fa-chart-bar me-2"></i>View Reports
+                            </a>
+                        {% else %}
+                            <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-warning btn-lg">
+                                <i class="fas fa-clock me-2"></i>Log Time Entry
+                            </a>
+                            <a href="{% url 'timesheet:job_list' %}" class="btn btn-outline-warning">
+                                <i class="fas fa-briefcase me-2"></i>Manage Jobs
+                            </a>
+                            <a href="{% url 'timesheet:weekly_summary' %}" class="btn btn-outline-info">
+                                <i class="fas fa-chart-bar me-2"></i>View Reports
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -116,10 +198,22 @@
                     <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Recent Activity</h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted text-center py-4">
-                        <i class="fas fa-info-circle me-2"></i>
-                        No time entries recorded yet.
-                    </p>
+                    {% if today_entries %}
+                        {% for entry in today_entries %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong>{{ entry.job.name }}</strong><br>
+                                    <small class="text-muted">{{ entry.start_time }} - {{ entry.end_time }}</small>
+                                </div>
+                                <span class="badge bg-primary">{{ entry.total_hours|floatformat:1 }}h</span>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No time entries recorded yet.
+                        </p>
+                    {% endif %}
                 </div>
             </div>
         </div>

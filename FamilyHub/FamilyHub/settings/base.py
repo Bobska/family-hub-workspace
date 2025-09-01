@@ -63,6 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.timesheet_app.context_processors.integration_context',  # Integration mode detection
                 # Architecture-compliant minimal context processors only
             ],
         },

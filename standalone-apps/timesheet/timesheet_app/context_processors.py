@@ -1,6 +1,6 @@
 """
 Debug Context Processor for Standalone Timesheet App
-Provides debug information for the visual debug widget
+Provides debug information for the visual debug widget and integration context
 """
 
 import os
@@ -8,6 +8,30 @@ import sys
 from django.conf import settings
 from django.db import connection
 from django.apps import apps
+
+
+def integration_context(request):
+    """
+    Provides integration context to all templates.
+    
+    This context processor automatically detects whether the app is running
+    in standalone mode or integrated with FamilyHub and makes this information
+    available to all templates.
+    
+    Returns:
+        dict: Context variables for integration mode detection
+    """
+    # Detect integration mode based on settings
+    integrated_mode = (
+        hasattr(settings, 'IS_STANDALONE') and not settings.IS_STANDALONE
+    ) or (
+        'apps.timesheet_app' in settings.INSTALLED_APPS
+    )
+    
+    return {
+        'integrated_mode': integrated_mode,
+        'standalone_mode': not integrated_mode,
+    }
 
 
 def debug_info(request):

@@ -7,6 +7,7 @@ from django.db.models.functions import Cast
 from django.urls import reverse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from datetime import datetime, timedelta, date
 from decimal import Decimal
 import pytz
