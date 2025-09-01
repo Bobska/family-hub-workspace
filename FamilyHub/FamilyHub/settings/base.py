@@ -55,9 +55,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR / 'templates',
-            # NOTE: Shared templates moved below to allow app-specific templates to override
-            # BASE_DIR.parent / 'shared' / 'apps' / 'timesheet' / 'templates',  # Shared timesheet templates (temporarily disabled for unified navigation)
+            BASE_DIR / 'templates',  # Global templates - DO NOT put app templates here
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -65,11 +63,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'home.context_processors.debug_info',  # Debug widget information
-                'home.context_processors.familyhub_context',  # Local FamilyHub app info
-                'home.context_processors.app_info',  # App info for templates
-                'home.context_processors.navigation_context',  # Navigation and current app context
-                # 'apps.timesheet_integration.timesheet_context_processor',  # Temporarily disabled
+                # Architecture-compliant minimal context processors only
             ],
         },
     },
