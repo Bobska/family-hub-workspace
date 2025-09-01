@@ -168,6 +168,31 @@ local-start-timesheet: ## 📋 Start timesheet standalone app (port 8001)
 	@echo "📋 Starting timesheet standalone app on port 8001..."
 	@cd standalone-apps\timesheet && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8001 }"
 
+# =============================================================================
+# Docker Integration Testing (PROMPT 3)
+# =============================================================================
+
+docker-test: ## 🐳 Run Docker integration tests (PROMPT 3)
+	@echo "🐳 Running Docker integration tests..."
+	@python docker_test.py
+
+docker-build-familyhub: ## 🏗️ Build FamilyHub Docker image only
+	@echo "🏗️ Building FamilyHub Docker image..."
+	@docker-compose build familyhub
+
+docker-start-familyhub: ## 🚀 Start FamilyHub in Docker
+	@echo "🚀 Starting FamilyHub in Docker..."
+	@docker-compose up -d familyhub
+	@echo "✅ FamilyHub started at http://localhost:8000"
+
+docker-logs-familyhub: ## 📋 View FamilyHub Docker logs
+	@echo "📋 Viewing FamilyHub Docker logs..."
+	@docker-compose logs -f familyhub
+
+docker-stop-familyhub: ## 🛑 Stop FamilyHub Docker containers
+	@echo "🛑 Stopping FamilyHub Docker containers..."
+	@docker-compose down
+
 local-start-daycare: ## 🏠 Start daycare invoice standalone app (port 8002)
 	@echo "🏠 Starting daycare invoice standalone app on port 8002..."
 	@cd standalone-apps\daycare_invoice && powershell -ExecutionPolicy Bypass -Command "& { .\venv\Scripts\Activate.ps1; python manage.py runserver 8002 }"

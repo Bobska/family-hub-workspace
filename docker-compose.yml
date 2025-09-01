@@ -17,20 +17,30 @@ services:
       retries: 3
       start_period: 30s
 
-  web:
-    build: .
+  familyhub:
+    build: 
+      context: .
+      dockerfile: FamilyHub/Dockerfile
     volumes:
       - ./FamilyHub:/app/FamilyHub
+      - ./standalone-apps:/standalone-apps
+      - ./shared:/app/shared
     ports:
       - "8000:8000"
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      DJANGO_SETTINGS_MODULE: FamilyHub.settings.docker
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=FamilyHub.settings.docker
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
       db:
         condition: service_healthy
+    command: >
+      sh -c "cd /app/FamilyHub && 
+             python manage.py migrate --noinput && 
+             python manage.py collectstatic --noinput && 
+             python manage.py runserver 0.0.0.0:8000"
 
 volumes:
   postgres_data:

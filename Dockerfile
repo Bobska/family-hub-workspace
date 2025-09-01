@@ -18,10 +18,15 @@ ENV DJANGO_SETTINGS_MODULE=FamilyHub.settings.docker
 
 # Copy application directories
 COPY ./FamilyHub /app/FamilyHub
+COPY ./standalone-apps /app/standalone-apps
 COPY ./shared /app/shared
-# Note: timesheet_app is now integrated via the integrate_app.py script
-# No need to copy standalone app directly - it's already in FamilyHub/apps/
 COPY ./scripts /app/scripts
+
+# Create symbolic links for integrated apps if they don't exist
+RUN mkdir -p /app/FamilyHub/apps && \
+    if [ ! -d "/app/FamilyHub/apps/timesheet_app" ] && [ -d "/app/standalone-apps/timesheet/timesheet_app" ]; then \
+        ln -sf /app/standalone-apps/timesheet/timesheet_app /app/FamilyHub/apps/timesheet_app; \
+    fi
 
 # Set working directory to Django project root
 WORKDIR /app/FamilyHub

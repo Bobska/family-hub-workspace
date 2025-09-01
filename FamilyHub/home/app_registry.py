@@ -129,21 +129,33 @@ class FamilyHubAppsRegistry:
         
         for app in self.get_active_apps():
             # Check if app has actual implementation
-            app_path = Path(f"apps/{app.slug}_app")
+            # Try multiple possible paths for Docker/local compatibility
+            possible_paths = [
+                Path(f"apps/{app.slug}_app"),  # Local development
+                Path(f"/app/apps/{app.slug}_app"),  # Docker absolute path
+                Path(f"/standalone-apps/{app.slug}/{app.slug}_app"),  # Docker standalone path
+            ]
             
-            # An app is considered available if it has models.py with content
-            models_file = app_path / "models.py"
-            if models_file.exists():
-                try:
-                    content = models_file.read_text(encoding='utf-8')
-                    # Check if models.py has substantial content (not just imports/comments)
-                    lines = [line.strip() for line in content.split('\n') if line.strip() and not line.strip().startswith('#')]
-                    if len(lines) > 5:  # Has more than just basic imports
-                        # Mark as available and integrated if it has real content
-                        app.is_integrated = True
-                        available_apps.append(app)
-                except:
-                    continue
+            app_found = False
+            for app_path in possible_paths:
+                # An app is considered available if it has models.py with content
+                models_file = app_path / "models.py"
+                if models_file.exists():
+                    try:
+                        content = models_file.read_text(encoding='utf-8')
+                        # Check if models.py has substantial content (not just imports/comments)
+                        lines = [line.strip() for line in content.split('\n') if line.strip() and not line.strip().startswith('#')]
+                        if len(lines) > 5:  # Has more than just basic imports
+                            # Mark as available and integrated if it has real content
+                            app.is_integrated = True
+                            available_apps.append(app)
+                            app_found = True
+                            break
+                    except:
+                        continue
+            
+            if app_found:
+                break
                     
         return available_apps
 
