@@ -1,11 +1,11 @@
 """
-FamilyHub Template Debug Tags
+Timesheet App Template Debug Tags - Standalone Mode
 
 Custom Django template tags for debugging template rendering and displaying
-template hierarchy information in development mode.
+template hierarchy information in development mode for standalone timesheet app.
 
 Usage in templates:
-    {% load debug_tags %}
+    {% load timesheet_debug_tags %}
     {% template_debug_banner %}
     {% show_template_path %}
     {% template_info "custom_template_name.html" %}
@@ -23,15 +23,15 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def template_debug_banner(context, template_name=None):
     """
-    Display a debug banner showing template information.
-    Only shows in DEBUG mode.
-    
+    Display a debug banner showing template information for standalone mode.
+    Only shows in DEBUG mode. Shows orange banner for standalone mode.
+
     Usage: {% template_debug_banner %}
     Usage: {% template_debug_banner "custom_template.html" %}
     """
     if not settings.DEBUG:
         return ''
-    
+
     # Get the current template name
     if template_name is None:
         template_obj = context.template
@@ -41,12 +41,12 @@ def template_debug_banner(context, template_name=None):
             template_name = template_obj.origin.name
         else:
             template_name = "Unknown Template"
-    
+
     # Try to get relative path from project root
     try:
         if template_name and os.path.isabs(template_name):
             # Convert absolute path to relative from workspace root
-            workspace_root = Path(__file__).resolve().parent.parent.parent.parent
+            workspace_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
             template_path = Path(template_name)
             try:
                 rel_path = template_path.relative_to(workspace_root)
@@ -57,36 +57,30 @@ def template_debug_banner(context, template_name=None):
             template_display = template_name or "Unknown"
     except Exception:
         template_display = template_name or "Unknown"
-    
+
     # Get the template directory info
-    template_dir = "Unknown"
-    app_context = "Unknown"
-    
+    template_dir = "Standalone Timesheet"
+    app_context = "Standalone Mode"
+
     if template_name and isinstance(template_name, str):
-        if 'FamilyHub/templates/' in template_name:
-            template_dir = "Global Templates"
-            app_context = "FamilyHub Core"
-        elif 'home/templates/' in template_name:
-            template_dir = "Home App"
-            app_context = "Dashboard & Core"
-        elif 'timesheet_app/templates/' in template_name:
+        if 'timesheet_app/' in template_name:
             template_dir = "Timesheet App"
-            app_context = "Integrated App"
-        elif 'apps/' in template_name:
-            template_dir = "Integrated App"
-            app_context = "Apps Directory"
-        elif 'standalone-apps/' in template_name:
-            template_dir = "Standalone App"
-            app_context = "Independent Mode"
-    
-    # Create the debug banner HTML
+            app_context = "Standalone Mode (Port 8001)"
+        elif 'registration/' in template_name:
+            template_dir = "Authentication"
+            app_context = "Django Auth"
+        else:
+            template_dir = "Shared Templates"
+            app_context = "Standalone Mode"
+
+    # Create the debug banner HTML with orange gradient for standalone
     banner_html = f"""
     <div class="template-debug-banner" style="
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
         color: white;
         padding: 8px 15px;
         margin: 0;
-        border-left: 4px solid #ffc107;
+        border-left: 4px solid #10b981;
         font-family: 'Courier New', monospace;
         font-size: 12px;
         line-height: 1.3;
@@ -97,7 +91,7 @@ def template_debug_banner(context, template_name=None):
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
             <div>
                 <span style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 3px; margin-right: 10px;">
-                    🔧 TEMPLATE DEBUG
+                    🕐 TIMESHEET STANDALONE
                 </span>
                 <strong>{template_display}</strong>
             </div>
@@ -109,7 +103,7 @@ def template_debug_banner(context, template_name=None):
         </div>
     </div>
     """
-    
+
     return mark_safe(banner_html)
 
 
@@ -117,20 +111,20 @@ def template_debug_banner(context, template_name=None):
 def show_template_path(context):
     """
     Display just the template path for debugging.
-    
+
     Usage: {% show_template_path %}
     """
     if not settings.DEBUG:
         return ''
-    
+
     template_obj = context.template
     template_name = "Unknown"
-    
+
     if hasattr(template_obj, 'name'):
         template_name = template_obj.name
     elif hasattr(template_obj, 'origin') and template_obj.origin:
         template_name = template_obj.origin.name
-    
+
     return mark_safe(f'<small class="text-muted">Template: {template_name}</small>')
 
 
@@ -138,21 +132,23 @@ def show_template_path(context):
 def template_info(template_name, show_full_path=False):
     """
     Display information about a specific template.
-    
+
     Usage: {% template_info "base.html" %}
     Usage: {% template_info "timesheet/dashboard.html" True %}
     """
     if not settings.DEBUG:
         return ''
-    
-    # Basic template info
+
+    # Basic template info for standalone mode
     info_html = f"""
-    <div class="template-info alert alert-info p-2 mb-2" style="font-size: 11px;">
-        <strong>Template:</strong> {template_name}
+    <div class="template-info alert alert-warning p-2 mb-2" style="font-size: 11px; background-color: rgba(249, 115, 22, 0.1); border-color: #f97316;">
+        <strong>Standalone Timesheet Template:</strong> {template_name}
+        <br><strong>Location:</strong> shared/apps/timesheet/templates/
+        <br><strong>Mode:</strong> Standalone (Port 8001)
         {f'<br><strong>Full Path:</strong> {template_name}' if show_full_path else ''}
     </div>
     """
-    
+
     return mark_safe(info_html)
 
 
@@ -160,12 +156,12 @@ def template_info(template_name, show_full_path=False):
 def debug_context_vars(context, *var_names):
     """
     Display context variables for debugging.
-    
-    Usage: {% debug_context_vars "user" "apps" "request" %}
+
+    Usage: {% debug_context_vars "user" "entries" "request" %}
     """
     if not settings.DEBUG:
         return ''
-    
+
     debug_info = []
     for var_name in var_names:
         if var_name in context:
@@ -178,17 +174,17 @@ def debug_context_vars(context, *var_names):
             debug_info.append(f"<strong>{var_name}:</strong> {value_repr}")
         else:
             debug_info.append(f"<strong>{var_name}:</strong> <em>Not found</em>")
-    
+
     if not debug_info:
         return ''
-    
+
     html = f"""
-    <div class="debug-context-vars alert alert-secondary p-2 mb-2" style="font-size: 11px;">
-        <strong>Context Variables:</strong><br>
+    <div class="debug-context-vars alert alert-warning p-2 mb-2" style="font-size: 11px; background-color: rgba(249, 115, 22, 0.1); border-color: #f97316;">
+        <strong>Context Variables (Standalone Timesheet):</strong><br>
         {'<br>'.join(debug_info)}
     </div>
     """
-    
+
     return mark_safe(html)
 
 
@@ -196,7 +192,7 @@ def debug_context_vars(context, *var_names):
 def debug_type(value):
     """
     Return the type of a value for debugging.
-    
+
     Usage: {{ some_variable|debug_type }}
     """
     return type(value).__name__
@@ -206,7 +202,7 @@ def debug_type(value):
 def debug_length(value):
     """
     Return the length of a value if it has one.
-    
+
     Usage: {{ some_list|debug_length }}
     """
     try:
@@ -219,42 +215,41 @@ def debug_length(value):
 def template_hierarchy():
     """
     Show the current template hierarchy for debugging.
-    
+
     Usage: {% template_hierarchy %}
     """
     if not settings.DEBUG:
         return ''
-    
-    # This is a simplified version - in a real implementation,
-    # you'd track the template inheritance chain
+
+    # Template hierarchy for standalone mode
     html = """
-    <div class="template-hierarchy alert alert-warning p-2 mb-2" style="font-size: 11px;">
-        <strong>Template Hierarchy:</strong><br>
-        Current Template → Base Template → Root
+    <div class="template-hierarchy alert alert-warning p-2 mb-2" style="font-size: 11px; background-color: rgba(249, 115, 22, 0.1); border-color: #f97316;">
+        <strong>Standalone Timesheet Template Hierarchy:</strong><br>
+        Current Template → Timesheet Base → Standalone Root
     </div>
     """
-    
+
     return mark_safe(html)
 
 
-# Additional tags for FamilyHub integration
+# Additional tags for standalone timesheet
 @register.simple_tag
 def debug_context():
     """
-    Return debug context information for FamilyHub integrated mode
+    Return debug context information for standalone mode
     """
     if not settings.DEBUG:
         return ""
     
-    return "DEBUG: FamilyHub (Integrated) - FAMILYHUB_INTEGRATED Mode - Port 8000"
+    return "DEBUG: Timesheet (Standalone) - STANDALONE Mode - Port 8001"
 
 
 @register.filter
 def debug_highlight(value):
     """
-    Add debug highlighting to template values with purple theme
+    Add debug highlighting to template values with orange theme
     """
     if not settings.DEBUG:
         return value
     
-    return mark_safe(f'<span style="background-color: rgba(102, 126, 234, 0.2); padding: 2px 4px; border-radius: 3px;">{value}</span>')
+    return mark_safe(f'<span style="background-color: rgba(249, 115, 22, 0.2); padding: 2px 4px; border-radius: 3px;">{value}</span>')

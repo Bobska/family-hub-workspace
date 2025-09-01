@@ -1,4 +1,4 @@
-{% load familyhub_debug_tags %}
+{% load debug_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +76,7 @@
 <body>
     
     <!-- Debug Banner (only in DEBUG mode) -->
-    {% familyhub_debug_banner %}
+    {% template_debug_banner %}
     
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light">
@@ -158,7 +158,7 @@
     <!-- Debug Footer (only in DEBUG mode) -->
     {% if debug %}
     <div style="background: rgba(102, 126, 234, 0.1); padding: 5px 10px; text-align: center; font-size: 11px; color: #666;">
-        {% familyhub_debug_context %}
+        {% debug_context %}
     </div>
     {% endif %}
     
