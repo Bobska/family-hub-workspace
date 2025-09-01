@@ -1,4 +1,3 @@
-{% load debug_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -111,7 +110,6 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
-    {% debug_banner %}
     <!-- Orange Debug Banner for Standalone Mode -->
     {% load static %}
     {% if debug %}

@@ -20,6 +20,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR.parent.parent / 'shared' / 'apps'))
 
 
+import os
+import sys
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Add shared directory to Python path for shared components
+SHARED_DIR = BASE_DIR.parent.parent / 'shared'
+sys.path.insert(0, str(SHARED_DIR))
+
+# Deployment context flag for dual deployment strategy  
+IS_STANDALONE = True
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -59,7 +73,9 @@ ROOT_URLCONF = 'timesheet_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR.parent.parent / 'shared' / 'apps' / 'timesheet' / 'templates',  # Shared timesheet templates
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,6 +84,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'timesheet_app.context_processors.debug_info',  # Debug widget information
                 'timesheet_app.context_processors.deployment_context',
+                'timesheet_app.context_processors.app_info',  # Local app info (no shared imports)
             ],
         },
     },

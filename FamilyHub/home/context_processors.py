@@ -93,3 +93,25 @@ def debug_info(request):
                 'system': {'base_dir': 'Error loading'},
             }
         }
+
+
+def app_info(request):
+    """
+    Provide app information to all templates.
+    This provides the same interface as the shared context processor.
+    """
+    return {
+        'app_info': {
+            'name': 'FamilyHub',
+            'mode': 'Integrated',
+            'color': 'purple',
+            'url': '/',
+            'deployment_mode': {
+                'mode': 'INTEGRATED',
+                'name': 'FamilyHub (Integrated)',
+                'color': '#7c3aed',  # Purple for integrated
+                'port': '8000',
+                'banner_class': 'integrated'
+            }
+        }
+    }

@@ -56,7 +56,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
-            BASE_DIR.parent / 'timesheet_app' / 'templates',
+            BASE_DIR.parent / 'shared' / 'apps' / 'timesheet' / 'templates',  # Shared timesheet templates
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -65,6 +65,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'home.context_processors.debug_info',  # Debug widget information
+                'home.context_processors.familyhub_context',  # Local FamilyHub app info
+                'home.context_processors.app_info',  # App info for templates
                 # 'apps.timesheet_integration.timesheet_context_processor',  # Temporarily disabled
             ],
         },

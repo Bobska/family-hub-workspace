@@ -94,3 +94,18 @@ def deployment_context(request):
             'architecture': 'Independent Django App'
         }
     }
+
+
+def app_info(request):
+    """
+    Context processor that provides app information for templates
+    Local implementation for standalone mode - no shared imports
+    """
+    return {
+        'app_info': {
+            'name': 'Timesheet (Standalone)',
+            'color': '#ff6b35',  # Orange for standalone
+            'mode': 'STANDALONE',
+            'port': '8001'
+        }
+    }
