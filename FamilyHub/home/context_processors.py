@@ -20,11 +20,17 @@ def familyhub_context(request):
     - App registry data for navigation
     - Common settings for templates
     - User-specific data
+    - Integration mode detection
     """
+    # Detect if we're in integrated mode (running within FamilyHub)
+    # vs standalone mode (running as individual app)
+    integrated_mode = 'home' in settings.INSTALLED_APPS
+    
     return {
         'familyhub_apps': apps_registry.get_active_apps(),
         'familyhub_debug': settings.DEBUG,
         'familyhub_version': getattr(settings, 'APP_VERSION', '1.0.0'),
+        'integrated_mode': integrated_mode,
     }
 
 

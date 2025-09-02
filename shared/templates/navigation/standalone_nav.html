@@ -1,0 +1,51 @@
+{# 
+Standalone Timesheet Navigation Template
+Complete navigation for standalone mode
+#}
+
+<!-- Primary Navigation for Standalone Mode -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+    <div class="container">
+        <!-- Brand for Standalone Mode -->
+        <a class="navbar-brand" href="{% url 'timesheet:dashboard' %}">
+            <i class="fas fa-clock me-2"></i>Timesheet (Standalone)
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Timesheet App Navigation -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                       href="{% url 'timesheet:dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'daily_entry' %}active{% endif %}"
+                       href="{% url 'timesheet:daily_entry' %}">
+                        <i class="fas fa-calendar-day me-1"></i>Daily Entry
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'weekly_summary' %}active{% endif %}"
+                       href="{% url 'timesheet:weekly_summary' %}">
+                        <i class="fas fa-calendar-week me-1"></i>Weekly Summary
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'job_list' %}active{% endif %}"
+                       href="{% url 'timesheet:job_list' %}">
+                        <i class="fas fa-briefcase me-1"></i>Jobs
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Include User Menu for standalone mode -->
+            {% include 'user_menu.html' %}
+        </div>
+    </div>
+</nav>

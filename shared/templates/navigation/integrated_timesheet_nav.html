@@ -1,0 +1,57 @@
+{# 
+FamilyHub Integrated Navigation Template
+Extends global FamilyHub navigation with Tier 2 app-specific navigation
+Used when timesheet is integrated into FamilyHub
+#}
+
+<!-- Tier 2 Navigation: App-specific timesheet navigation -->
+<!-- This appears below the main FamilyHub navigation -->
+<nav class="secondary-nav bg-light border-bottom">
+    <div class="container">
+        <div class="d-flex align-items-center py-2">
+            <!-- Breadcrumb showing app context -->
+            <div class="breadcrumb-context me-auto">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'home:dashboard' %}" class="text-decoration-none">
+                                <i class="fas fa-home"></i> FamilyHub
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <i class="fas fa-clock"></i> Timesheet
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Timesheet App Navigation Pills -->
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                       href="{% url 'timesheet:dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'daily_entry' %}active{% endif %}"
+                       href="{% url 'timesheet:daily_entry' %}">
+                        <i class="fas fa-calendar-day me-1"></i>Daily Entry
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'weekly_summary' %}active{% endif %}"
+                       href="{% url 'timesheet:weekly_summary' %}">
+                        <i class="fas fa-calendar-week me-1"></i>Weekly Summary
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'job_list' %}active{% endif %}"
+                       href="{% url 'timesheet:job_list' %}">
+                        <i class="fas fa-briefcase me-1"></i>Jobs
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

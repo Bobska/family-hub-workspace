@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{# 
+Timesheet Integrated Base Template
+This template is used when timesheet is integrated into FamilyHub
+It extends the main FamilyHub base.html and adds timesheet-specific Tier 2 navigation
+#}
+
+{% block title %}{% block timesheet_title %}Timesheet{% endblock %} - FamilyHub{% endblock %}
+
+{% block extra_css %}
+    <!-- Timesheet specific CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'timesheet_app/css/main.css' %}">
+    {% block timesheet_css %}{% endblock %}
+{% endblock %}
+
+{% block app_navigation %}
+    <!-- Include the shared integrated timesheet navigation component -->
+    {% include '../../../../../shared/templates/navigation/integrated_timesheet_nav.html' %}
+{% endblock %}
+
+{% block content %}
+    {% block timesheet_content %}
+    {% endblock %}
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Timesheet specific JavaScript -->
+    <script src="{% static 'timesheet_app/js/main.js' %}"></script>
+    {% block timesheet_js %}{% endblock %}
+{% endblock %}
