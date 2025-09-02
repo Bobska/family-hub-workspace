@@ -1,14 +1,6 @@
-{% if integrated_mode %}
-    {% extends "base.html" %}
-{% else %}
-    {% extends 'timesheet/base.html' %}
-{% endif %}
+{% extends 'timesheet/base.html' %}
 
-{% if integrated_mode %}
-    {% block title %}Daily Entry - Timesheet{% endblock %}
-{% else %}
-    {% block title %}Daily Entry - Timesheet Standalone{% endblock %}
-{% endif %}
+{% block title %}Daily Entry - Timesheet Standalone{% endblock %}
 
 {% if integrated_mode %}
     {% block app_navigation %}

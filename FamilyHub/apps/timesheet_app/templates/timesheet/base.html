@@ -41,72 +41,7 @@
     {% endif %}
 
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'timesheet:dashboard' %}">
-                <i class="fas fa-clock me-2"></i>Timesheet (Standalone)
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-                           href="{% url 'timesheet:dashboard' %}">
-                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'daily_entry' %}active{% endif %}"
-                           href="{% url 'timesheet:daily_entry' %}">
-                            <i class="fas fa-calendar-day me-1"></i>Daily Entry
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'weekly_summary' %}active{% endif %}"
-                           href="{% url 'timesheet:weekly_summary' %}">
-                            <i class="fas fa-calendar-week me-1"></i>Weekly Summary
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'job_list' %}active{% endif %}"
-                           href="{% url 'timesheet:job_list' %}">
-                            <i class="fas fa-briefcase me-1"></i>Jobs
-                        </a>
-                    </li>
-                </ul>
-
-                {% if user.is_authenticated %}
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>{{ user.username }}
-                        </a>
-                        <ul class="dropdown-menu">
-                            {% if user.is_staff %}
-                                <li><a class="dropdown-item" href="{% url 'admin:index' %}">
-                                    <i class="fas fa-cog me-1"></i>Admin Panel
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                            {% endif %}
-                            <li>
-                                <form method="post" action="{% url 'logout' %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item logout-btn border-0 bg-transparent">
-                                        <i class="fas fa-sign-out-alt me-1"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
+    {% include 'timesheet/navigation.html' %}
 
     <!-- Main Content -->
     <main class="container my-4 flex-grow-1">
