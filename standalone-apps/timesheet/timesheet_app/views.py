@@ -7,7 +7,6 @@ from django.db.models.functions import Cast
 from django.urls import reverse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.conf import settings
 from datetime import datetime, timedelta, date
 from decimal import Decimal
 import pytz
@@ -77,20 +76,7 @@ def dashboard(request):
         'form': form,
         'has_jobs': Job.objects.filter(user=request.user).exists(),
     }
-    
-    # Choose template based on integration mode
-    integrated_mode = (
-        hasattr(settings, 'IS_STANDALONE') and not settings.IS_STANDALONE
-    ) or (
-        'apps.timesheet_app' in settings.INSTALLED_APPS
-    )
-    
-    if integrated_mode:
-        template_name = 'timesheet/dashboard_integrated.html'
-    else:
-        template_name = 'timesheet/dashboard_standalone.html'
-    
-    return render(request, template_name, context)
+    return render(request, 'timesheet/dashboard.html', context)
 
 
 @login_required
@@ -171,7 +157,16 @@ def daily_entry(request):
         'next_date': next_date,
         'has_jobs': Job.objects.filter(user=request.user).exists(),
     }
-    return render(request, 'timesheet/daily_entry.html', context)
+    
+    # Template selection based on integration mode
+    if request.resolver_match.namespace == 'timesheet' and hasattr(request, 'integration_context'):
+        # Integrated mode - use FamilyHub base template
+        template_name = 'timesheet/daily_entry_integrated.html'
+    else:
+        # Standalone mode - use timesheet base template
+        template_name = 'timesheet/daily_entry_standalone.html'
+    
+    return render(request, template_name, context)
 
 
 @login_required
@@ -474,3 +469,29 @@ def validate_overlap(request):
             })
     
     return JsonResponse({'valid': False, 'message': 'Invalid request'})
+
+
+@login_required
+def debug_showcase(request):
+    """
+    Debug showcase view - only available in DEBUG mode
+    Shows template debugging system for FamilyHub integrated timesheet app
+    """
+    from django.conf import settings
+    
+    if not settings.DEBUG:
+        messages.error(request, 'Debug views are only available in DEBUG mode.')
+        return redirect('timesheet:dashboard')
+    
+    context = {
+        'title': 'Debug Showcase - FamilyHub Integrated Timesheet',
+        'debug_info': {
+            'template_location': 'FamilyHub/apps/timesheet_app/templates/',
+            'mode': 'FAMILYHUB_INTEGRATED',
+            'app_name': 'Timesheet (FamilyHub Integrated)',
+            'port': '8000',
+            'debug_enabled': settings.DEBUG,
+        }
+    }
+    
+    return render(request, 'timesheet/debug_showcase.html', context)

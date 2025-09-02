@@ -1,0 +1,315 @@
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h2">
+                    <i class="fas fa-calendar-day me-2 text-primary"></i>Daily Entry
+                </h1>
+                <p class="text-muted">{{ formatted_date }} ({{ day_name }})</p>
+            </div>
+            <div>
+                <a href="{% url 'timesheet:dashboard' %}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                </a>
+                {% if not has_jobs %}
+                    <a href="{% url 'timesheet:job_create' %}" class="btn btn-warning">
+                        <i class="fas fa-plus me-1"></i>Add Job
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Date Navigation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <a href="{% url 'timesheet:daily_entry' %}?date={{ prev_date|date:'Y-m-d' }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-left me-1"></i>Previous Day
+                        </a>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <form method="get" class="d-inline-block">
+                            <div class="input-group">
+                                {{ date_form.date }}
+                                <button type="submit" class="btn btn-outline-secondary">
+                                    <i class="fas fa-calendar"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        {% if next_date %}
+                            <a href="{% url 'timesheet:daily_entry' %}?date={{ next_date|date:'Y-m-d' }}" 
+                               class="btn btn-outline-primary">
+                                Next Day<i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Today</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Add Entry Form -->
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>Add Time Entry
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if has_jobs %}
+                    <form method="post" id="timeEntryForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.job.id_for_label }}" class="form-label">Job</label>
+                            {{ form.job }}
+                            {% if form.job.errors %}
+                                <div class="text-danger small">{{ form.job.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.date.id_for_label }}" class="form-label">Date</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                                <div class="text-danger small">{{ form.date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.start_time.id_for_label }}" class="form-label">Start Time</label>
+                                {{ form.start_time }}
+                                {% if form.start_time.errors %}
+                                    <div class="text-danger small">{{ form.start_time.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time</label>
+                                {{ form.end_time }}
+                                {% if form.end_time.errors %}
+                                    <div class="text-danger small">{{ form.end_time.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.break_duration.id_for_label }}" class="form-label">Break Duration</label>
+                            {{ form.break_duration }}
+                            {% if form.break_duration.errors %}
+                                <div class="text-danger small">{{ form.break_duration.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div id="overlapAlert" class="alert alert-warning d-none">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="overlapMessage"></span>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                            <i class="fas fa-save me-1"></i>Add Entry
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-briefcase fa-4x text-muted mb-3"></i>
+                        <h6>No Jobs Available</h6>
+                        <p class="text-muted">You need to add at least one job before creating time entries.</p>
+                        <a href="{% url 'timesheet:job_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add Your First Job
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Daily Entries -->
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list me-2"></i>Time Entries for {{ selected_date|date:"M d, Y" }}
+                </h5>
+                <span class="badge bg-primary fs-6">
+                    Total: {{ daily_total|floatformat:2 }} hours
+                </span>
+            </div>
+            <div class="card-body">
+                {% if entries %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job</th>
+                                    <th>Time Period</th>
+                                    <th>Break</th>
+                                    <th>Total Hours</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in entries %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ entry.job.display_name }}</strong>
+                                            {% if entry.job.address %}
+                                                <br><small class="text-muted">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>{{ entry.job.address }}
+                                                </small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}
+                                        </td>
+                                        <td>
+                                            {% if entry.break_duration > 0 %}
+                                                <span class="badge bg-info">
+                                                    {{ entry.get_break_duration_display }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">None</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="total-hours">{{ entry.total_hours|floatformat:2 }}h</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'timesheet:entry_edit' entry.pk %}" 
+                                                   class="btn btn-outline-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'timesheet:entry_delete' entry.pk %}" 
+                                                   class="btn btn-outline-danger" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-info">
+                                    <th colspan="3">Daily Total</th>
+                                    <th>{{ daily_total|floatformat:2 }}h</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                        <h5>No Entries for This Date</h5>
+                        <p class="text-muted">Add your first time entry for {{ selected_date|date:"F d, Y" }}.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                </h6>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'timesheet:weekly_summary' %}" class="btn btn-outline-info">
+                        <i class="fas fa-calendar-week me-1"></i>View Weekly Summary
+                    </a>
+                    <a href="{% url 'timesheet:job_list' %}" class="btn btn-outline-success">
+                        <i class="fas fa-briefcase me-1"></i>Manage Jobs
+                    </a>
+                    <a href="{% url 'timesheet:daily_entry' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-calendar-day me-1"></i>Today
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Overlap validation
+    function validateOverlap() {
+        const date = document.getElementById('id_date').value;
+        const startTime = document.getElementById('id_start_time').value;
+        const endTime = document.getElementById('id_end_time').value;
+        
+        if (date && startTime && endTime) {
+            fetch('{% url "timesheet:validate_overlap" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `date=${date}&start_time=${startTime}&end_time=${endTime}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const overlapAlert = document.getElementById('overlapAlert');
+                const overlapMessage = document.getElementById('overlapMessage');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                if (!data.valid) {
+                    overlapAlert.classList.remove('d-none');
+                    overlapMessage.textContent = data.message;
+                    submitBtn.disabled = true;
+                } else {
+                    overlapAlert.classList.add('d-none');
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+    }
+    
+    // Add event listeners for overlap validation and date auto-submit
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('id_date');
+        const startTimeInput = document.getElementById('id_start_time');
+        const endTimeInput = document.getElementById('id_end_time');
+        
+        // Auto-submit date form when date changes
+        if (dateInput) {
+            dateInput.addEventListener('change', function() {
+                this.form.submit();
+            });
+        }
+        
+        if (dateInput && startTimeInput && endTimeInput) {
+            dateInput.addEventListener('change', validateOverlap);
+            startTimeInput.addEventListener('change', validateOverlap);
+            endTimeInput.addEventListener('change', validateOverlap);
+        }
+        
+        // Basic time validation
+        document.getElementById('timeEntryForm')?.addEventListener('submit', function(e) {
+            const startTime = startTimeInput.value;
+            const endTime = endTimeInput.value;
+            
+            if (startTime && endTime && startTime >= endTime) {
+                e.preventDefault();
+                alert('End time must be after start time');
+            }
+        });
+    });
+</script>
