@@ -78,17 +78,8 @@ def dashboard(request):
         'has_jobs': Job.objects.filter(user=request.user).exists(),
     }
     
-    # Choose template based on integration mode
-    integrated_mode = (
-        hasattr(settings, 'IS_STANDALONE') and not settings.IS_STANDALONE
-    ) or (
-        'apps.timesheet_app' in settings.INSTALLED_APPS
-    )
-    
-    if integrated_mode:
-        template_name = 'timesheet/dashboard_integrated.html'
-    else:
-        template_name = 'timesheet/dashboard_standalone.html'
+    # For standalone app, always use the dashboard template
+    template_name = 'timesheet/dashboard.html'
     
     return render(request, template_name, context)
 
