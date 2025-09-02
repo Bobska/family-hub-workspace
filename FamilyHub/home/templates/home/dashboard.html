@@ -3,103 +3,60 @@
 {% block title %}FamilyHub Dashboard{% endblock %}
 
 {% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4 text-white mb-3">
+        <i class="bi bi-house-heart-fill me-3"></i>FamilyHub
+    </h1>
+    <p class="lead text-white-50">Your central hub for family management</p>
+</div>
 
-<!-- FamilyHub Dashboard -->
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="text-center text-white mb-4">🏠 FamilyHub Dashboard</h1>
-            <div class="alert alert-success text-center">
-                <h4>✅ Template System Working!</h4>
-                <p>Server: Running | Templates: Loading | Base: Connected</p>
-                <a href="/home/debug/" class="btn btn-info btn-sm">🔧 Debug Dashboard</a>
-            </div>
-        </div>
-    </div>
-    
-    <!-- App Cards Grid -->
-    <div class="row g-4">
-        {% for app in apps %}
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow {% if not app.available %}opacity-75{% endif %}">
-                <div class="card-body text-center">
-                    <div class="app-icon {% if not app.available %}text-muted{% endif %}" style="font-size: 3rem;">{{ app.icon }}</div>
-                    <h5 class="card-title">{{ app.name }}</h5>
-                    <p class="card-text">{{ app.description }}</p>
-                    
-                    {% if app.available and app.url %}
-                        <!-- App is fully available and accessible -->
-                        <a href="{{ app.url }}" class="btn btn-{{ app.color }} w-100">
-                            <i class="fas fa-external-link-alt me-2"></i>Open {{ app.name }}
-                        </a>
-                        <small class="text-success d-block mt-2">
-                            <i class="fas fa-check-circle me-1"></i>Ready
-                        </small>
-                    {% elif app.available and not app.urls_available %}
-                        <!-- App exists but URLs not configured -->
-                        <button class="btn btn-outline-{{ app.color }} w-100" disabled>
-                            <i class="fas fa-cog me-2"></i>{{ app.name }} (Configuring...)
-                        </button>
-                        <small class="text-warning d-block mt-2">
-                            <i class="fas fa-exclamation-triangle me-1"></i>URLs being configured
-                        </small>
-                    {% else %}
-                        <!-- App not available -->
-                        <button class="btn btn-secondary w-100" disabled>
-                            <i class="fas fa-clock me-2"></i>Coming Soon
-                        </button>
-                        <small class="text-muted d-block mt-2">
-                            <i class="fas fa-info-circle me-1"></i>Not yet available
-                        </small>
-                    {% endif %}
-                    
-                    {% if debug %}
-                        <!-- Debug information -->
-                        <div class="mt-3 p-2 bg-light rounded">
-                            <small class="text-muted">
-                                Status: {{ app.status|default:"unknown" }}<br>
-                                Mode: {{ app.mode|default:"none" }}<br>
-                                URLs: {{ app.urls_available|yesno:"✓,✗" }}
-                            </small>
-                        </div>
-                    {% endif %}
+<!-- App Cards Grid -->
+<div class="row g-4">
+    {% for app in apps %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 shadow {% if not app.available %}opacity-75{% endif %}">
+            <div class="card-body text-center p-4">
+                <div class="app-icon {% if not app.available %}text-muted{% endif %} mb-3" style="font-size: 3rem;">
+                    {{ app.icon }}
                 </div>
+                <h5 class="card-title">{{ app.name }}</h5>
+                <p class="card-text text-muted">{{ app.description }}</p>
+                
+                {% if app.available and app.url %}
+                    <!-- App is fully available and accessible -->
+                    <a href="{{ app.url }}" class="btn btn-{{ app.color }} w-100">
+                        <i class="bi bi-arrow-right me-2"></i>Open {{ app.name }}
+                    </a>
+                    <small class="text-success d-block mt-2">
+                        <i class="bi bi-check-circle me-1"></i>Ready
+                    </small>
+                {% elif app.available and not app.urls_available %}
+                    <!-- App exists but URLs not configured -->
+                    <button class="btn btn-outline-{{ app.color }} w-100" disabled>
+                        <i class="bi bi-gear me-2"></i>{{ app.name }} (Configuring...)
+                    </button>
+                    <small class="text-warning d-block mt-2">
+                        <i class="bi bi-exclamation-triangle me-1"></i>URLs being configured
+                    </small>
+                {% else %}
+                    <!-- App not available -->
+                    <button class="btn btn-secondary w-100" disabled>
+                        <i class="bi bi-clock me-2"></i>Coming Soon
+                    </button>
+                    <small class="text-muted d-block mt-2">
+                        <i class="bi bi-info-circle me-1"></i>Not yet available
+                    </small>
+                {% endif %}
             </div>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-warning text-center">
-                <h4>⚠️ No Apps Available</h4>
-                <p>No integrated apps are currently available. Please check the app registry.</p>
-            </div>
-        </div>
-        {% endfor %}
     </div>
-    
-    <!-- Debug Section (only shown in DEBUG mode) -->
-    {% if debug %}
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="alert alert-warning" role="alert">
-                <h6><i class="fas fa-bug me-2"></i>Debug Mode Active</h6>
-                <p class="mb-2">Template debugging features are enabled. This section is only visible in development.</p>
-                <a href="{% url 'home:template_debug' %}" class="btn btn-outline-warning btn-sm">
-                    <i class="fas fa-code me-1"></i>View Template Debug Showcase
-                </a>
-            </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4><i class="bi bi-info-circle me-2"></i>Welcome to FamilyHub</h4>
+            <p class="mb-0">Apps are being configured and will appear here soon.</p>
         </div>
     </div>
-    {% endif %}
-    
-    <!-- Debug Information -->
-    <div class="row mt-4">
-        <div class="col-12 text-center">
-            <small class="text-white-50">
-                Branch: feature/visual-debug-info | 
-                Django: {{ settings.DEBUG|yesno:"Debug Mode,Production Mode" }} |
-                Apps Count: {{ apps|length }}
-            </small>
-        </div>
-    </div>
+    {% endfor %}
 </div>
 {% endblock %}

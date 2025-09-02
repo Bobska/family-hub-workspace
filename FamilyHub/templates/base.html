@@ -1,4 +1,4 @@
-{% load debug_tags %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,113 +12,12 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <style>
-        /* FamilyHub Global Styles */
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary: #667eea;
-            --secondary: #764ba2;
-        }
-        
-        body {
-            background: var(--primary-gradient);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        /* Navigation Styling */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        /* Active state for primary navigation */
-        .navbar-nav .nav-link.active {
-            color: var(--primary) !important;
-            border-bottom: 2px solid var(--primary);
-        }
-        
-        /* Secondary Navigation (App-specific) */
-        .secondary-nav {
-            background: rgba(255, 255, 255, 0.8);
-            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
-            padding: 0.5rem 0;
-        }
-        
-        .secondary-nav .nav-link {
-            color: #6c757d;
-            padding: 0.25rem 1rem;
-            border-radius: 0.375rem;
-            margin: 0 0.25rem;
-            transition: all 0.2s ease;
-        }
-        
-        .secondary-nav .nav-link:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: var(--primary);
-        }
-        
-        .secondary-nav .nav-link.active {
-            background: var(--primary-gradient);
-            color: white !important;
-        }
-        
-        /* Breadcrumb styling */
-        .breadcrumb {
-            background: none;
-            padding: 0.5rem 0;
-            margin-bottom: 1rem;
-        }
-        
-        .breadcrumb-item + .breadcrumb-item::before {
-            color: var(--primary);
-        }
-        
-        /* Main Content */
-        .main-content {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            margin: 2rem 0;
-            min-height: 600px;
-        }
-        
-        /* Card Styling */
-        .card {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: none;
-            border-radius: 10px;
-        }
-        
-        /* Button Styling */
-        .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6b4490 100%);
-            transform: translateY(-1px);
-        }
-        
-        {% block extra_css %}{% endblock %}
-    </style>
+    <!-- FamilyHub Main CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    
-    <!-- Debug Banner (only in DEBUG mode) -->
-    {% template_debug_banner %}
     
     <!-- Tier 1 - Global Navigation (ALWAYS VISIBLE) -->
     <nav class="navbar navbar-expand-lg navbar-light">
@@ -142,7 +41,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path|slice:':11' == '/timesheet/' %}active{% endif %}" href="/timesheet/">
-                            <i class="fas fa-clock me-1"></i>Timesheet
+                            <i class="bi bi-clock me-1"></i>Timesheet
                         </a>
                     </li>
                     <!-- Future apps will be added here -->
@@ -205,16 +104,9 @@
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     
+    <!-- FamilyHub Main JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
     {% block extra_js %}{% endblock %}
-    
-    <!-- Debug Footer (only in DEBUG mode) -->
-    {% if debug %}
-    <div style="background: rgba(102, 126, 234, 0.1); padding: 5px 10px; text-align: center; font-size: 11px; color: #666;">
-        {% debug_context %}
-    </div>
-    {% endif %}
-    
-    <!-- Debug Widget (only visible in DEBUG mode) -->
-    {% include 'partials/debug_widget.html' %}
 </body>
 </html>
