@@ -1,11 +1,10 @@
 """
 Home App URL Configuration
 
-URLs for the home application including dashboard and debug views.
+URLs for the home application including dashboard.
 """
 from django.urls import path
 from . import views
-from . import debug_views
 
 app_name = 'home'
 
@@ -15,6 +14,5 @@ urlpatterns = [
     
     # Debug and monitoring endpoints  
     path('debug/', views.debug_dashboard, name='debug_dashboard'),
-    path('debug/templates/', debug_views.template_debug_showcase, name='template_debug'),
     path('health/', views.health_check, name='health_check'),
 ]

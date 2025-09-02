@@ -33,7 +33,7 @@ def home_dashboard(request):
 
 
 def debug_dashboard(request):
-    """Visual debug dashboard showing template and app information"""
+    """Debug dashboard showing template and app information"""
     
     # Get app statuses for debugging
     app_statuses = app_registry.get_all_app_statuses()
@@ -49,6 +49,7 @@ def debug_dashboard(request):
         'app_statuses': app_statuses,
         'user': request.user,
         'today': timezone.now(),
+        'debug_mode': True,
         'settings_info': {
             'DEBUG': settings.DEBUG,
             'INSTALLED_APPS': settings.INSTALLED_APPS,
@@ -62,7 +63,7 @@ def debug_dashboard(request):
         }
     }
     
-    return render(request, 'home/debug_dashboard.html', context)
+    return render(request, 'home/dashboard.html', context)
 
 
 @require_http_methods(["GET"])
