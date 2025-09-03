@@ -1,24 +1,5 @@
 #!/usr/bin/env pwsh
-# FamilyHub Local Development - Start Server
-# Quick script to start the Django development server locally
-
-Write-Host "Starting FamilyHub Local Development Server..." -ForegroundColor Green
-Write-Host "===============================================" -ForegroundColor Cyan
-
-# Check if we're in the right directory
-if (-not (Test-Path "manage.py")) {
-    Write-Host "Error: manage.py not found. Please run this script from the FamilyHub directory." -ForegroundColor Red
-    exit 1
-}
-
-# Check if virtual environment exists
-if (-not (Test-Path "venv\Scripts\python.exe")) {
-    Write-Host "Error: Virtual environment not found. Please create a virtual environment first." -ForegroundColor Red
-    Write-Host "   Run: .\dev-setup-new.ps1" -ForegroundColor Yellow
-    exit 1
-}
-# FamilyHub Local Development - Start Server
-# Quick script to start the Django development server locally
+# FamilyHub Local Development - Start Server (Simple Version)
 
 Write-Host "🚀 Starting FamilyHub Local Development Server..." -ForegroundColor Green
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan

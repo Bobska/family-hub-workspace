@@ -128,7 +128,7 @@ local-setup: ## 🔧 Setup local development environment (virtual env, dependenc
 
 local-start: ## 🚀 Start local development server (using PowerShell script)
 	@echo "🚀 Starting local development server..."
-	@cd FamilyHub && powershell -ExecutionPolicy Bypass -File dev-start-clean.ps1
+	@cd FamilyHub && powershell -ExecutionPolicy Bypass -File dev-start-simple.ps1
 
 local-start-full: ## 🚀 Start local development server with all integrated apps
 	@echo "🚀 Starting local development server with full integration..."
