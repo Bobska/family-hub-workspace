@@ -1,0 +1,228 @@
+/* 
+ * FamilyHub - Global CSS Styles
+ * Main stylesheet for the FamilyHub integrated platform
+ * Following architecture guidelines for consistent styling
+ */
+
+/* CSS Variables for consistent theming */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --primary: #667eea;
+    --secondary: #764ba2;
+    --hover-gradient: linear-gradient(135deg, #5a6fd8 0%, #6b4490 100%);
+    
+    /* Additional design tokens */
+    --navbar-bg: rgba(255, 255, 255, 0.95);
+    --content-bg: rgba(255, 255, 255, 0.95);
+    --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.1);
+    --border-radius: 15px;
+    --border-radius-small: 10px;
+}
+
+/* Global Body Styles */
+body {
+    background: var(--primary-gradient);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =============================================================================
+   TIER 1 - GLOBAL NAVIGATION (NEVER CHANGE - ARCHITECTURE REQUIREMENT)
+   ============================================================================= */
+
+.navbar {
+    background: var(--navbar-bg);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Active state for primary navigation */
+.navbar-nav .nav-link.active {
+    color: var(--primary) !important;
+    border-bottom: 2px solid var(--primary);
+}
+
+/* =============================================================================
+   TIER 2 - APP NAVIGATION (CONTEXTUAL)
+   ============================================================================= */
+
+.secondary-nav {
+    background: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+    padding: 0.5rem 0;
+}
+
+.secondary-nav .nav-link {
+    color: #6c757d;
+    padding: 0.25rem 1rem;
+    border-radius: 0.375rem;
+    margin: 0 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.secondary-nav .nav-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--primary);
+}
+
+.secondary-nav .nav-link.active {
+    background: var(--primary-gradient);
+    color: white !important;
+}
+
+/* =============================================================================
+   MAIN CONTENT LAYOUT
+   ============================================================================= */
+
+.main-content {
+    background: var(--content-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-medium);
+    backdrop-filter: blur(10px);
+    margin: 2rem 0;
+    min-height: 600px;
+}
+
+/* =============================================================================
+   BREADCRUMB NAVIGATION
+   ============================================================================= */
+
+.breadcrumb {
+    background: none;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--primary);
+}
+
+/* =============================================================================
+   COMPONENTS - CARDS
+   ============================================================================= */
+
+.card {
+    box-shadow: var(--shadow-light);
+    border: none;
+    border-radius: var(--border-radius-small);
+}
+
+/* =============================================================================
+   COMPONENTS - BUTTONS  
+   ============================================================================= */
+
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: var(--hover-gradient);
+    transform: translateY(-1px);
+}
+
+/* =============================================================================
+   DEBUG WIDGET STYLING (INTEGRATED MODE)
+   ============================================================================= */
+
+#debug-widget {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Green for integrated mode */
+    color: white;
+    padding: 8px 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+}
+
+.debug-widget-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.debug-widget-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.debug-widget-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.debug-separator {
+    opacity: 0.8;
+}
+
+.debug-path {
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+/* Body padding for debug mode */
+.debug-mode {
+    padding-top: 50px !important;
+}
+
+/* =============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================= */
+
+@media (max-width: 768px) {
+    .main-content {
+        margin: 1rem 0;
+        border-radius: var(--border-radius-small);
+    }
+    
+    .debug-widget-content {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .debug-widget-left,
+    .debug-widget-right {
+        gap: 5px;
+    }
+    
+    .debug-path {
+        display: none;
+    }
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+.gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
