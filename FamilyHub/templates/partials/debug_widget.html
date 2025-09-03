@@ -1,0 +1,25 @@
+{% comment %}
+Debug Widget for FamilyHub - Only visible when DEBUG=True
+Provides visual indication of integrated mode vs standalone mode
+{% endcomment %}
+
+{% if debug %}
+<div id="debug-widget">
+    <div class="debug-widget-content">
+        <div class="debug-widget-left">
+            <i class="fas fa-home" style="font-size: 14px;"></i>
+            <strong>FamilyHub (Integrated)</strong>
+            <span class="debug-separator">|</span>
+            <span>INTEGRATED Mode</span>
+            <span class="debug-separator">|</span>
+            <span>Port 8000</span>
+            <span class="debug-separator">|</span>
+            <span class="debug-path">FamilyHub/templates/</span>
+        </div>
+        <div class="debug-widget-right">
+            <span class="debug-time">{% now "H:i:s" %}</span>
+            <span>UNIFIED</span>
+        </div>
+    </div>
+</div>
+{% endif %}
