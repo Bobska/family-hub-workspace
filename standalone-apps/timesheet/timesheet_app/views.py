@@ -465,3 +465,8 @@ def validate_overlap(request):
             })
     
     return JsonResponse({'valid': False, 'message': 'Invalid request'})
+
+
+def debug_test(request):
+    """Debug view to test context variables"""
+    return render(request, 'timesheet/debug_test.html')

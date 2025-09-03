@@ -39,7 +39,9 @@ def debug_info(request):
     Context processor that adds debug information to all templates
     Only active when DEBUG=True
     """
-    if not getattr(settings, 'DEBUG', False):
+    debug_enabled = getattr(settings, 'DEBUG', False)
+    
+    if not debug_enabled:
         return {}
     
     try:
@@ -56,7 +58,7 @@ def debug_info(request):
         # Environment Information
         env_info = {
             'django_settings': os.environ.get('DJANGO_SETTINGS_MODULE', 'Not Set'),
-            'debug_mode': getattr(settings, 'DEBUG', False),
+            'debug_mode': debug_enabled,
             'environment': 'Docker' if os.path.exists('/.dockerenv') else 'Local',
             'python_version': f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
             'is_standalone': getattr(settings, 'IS_STANDALONE', True),  # Default True for standalone
@@ -80,6 +82,7 @@ def debug_info(request):
         }
         
         return {
+            'debug': debug_enabled,  # Explicitly provide debug variable
             'debug_widget': {
                 'database': db_info,
                 'environment': env_info,
@@ -91,6 +94,7 @@ def debug_info(request):
         
     except Exception as e:
         return {
+            'debug': debug_enabled,  # Explicitly provide debug variable even on error
             'debug_widget': {
                 'status': 'error',
                 'error': str(e),
