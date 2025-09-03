@@ -78,6 +78,13 @@ def dashboard(request):
         'has_jobs': Job.objects.filter(user=request.user).exists(),
     }
     
+    # When rendered inside FamilyHub, indicate integrated mode so shared templates
+    # will extend the FamilyHub base template. FamilyHub always sets integrated_mode=True.
+    context['integrated_mode'] = True
+    # Use the integrated timesheet base which itself extends FamilyHub `base.html`
+    # and includes the timesheet navigation under the global FamilyHub navigation.
+    context['base_template'] = 'timesheet/base_integrated.html'
+
     # For standalone app, always use the dashboard template
     template_name = 'timesheet/dashboard.html'
     

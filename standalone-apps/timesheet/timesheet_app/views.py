@@ -78,7 +78,10 @@ def dashboard(request):
         'has_jobs': Job.objects.filter(user=request.user).exists(),
     }
     
-    # For standalone app, always use the dashboard template
+    # For standalone app, always use the dashboard template and ensure templates
+    # know they are in standalone mode.
+    context['integrated_mode'] = False
+    context['base_template'] = 'timesheet/base.html'
     template_name = 'timesheet/dashboard.html'
     
     return render(request, template_name, context)
