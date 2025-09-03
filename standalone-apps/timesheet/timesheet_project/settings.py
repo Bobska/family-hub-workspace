@@ -74,7 +74,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR.parent.parent / 'shared' / 'apps' / 'timesheet' / 'templates',  # Shared timesheet templates
+            BASE_DIR.parent.parent / 'shared' / 'templates',  # Shared templates directory
         ],
         'APP_DIRS': True,
         'OPTIONS': {

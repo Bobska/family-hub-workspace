@@ -56,6 +56,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',  # Global templates - DO NOT put app templates here
+            BASE_DIR.parent / 'shared' / 'templates',  # Shared templates directory
         ],
         'APP_DIRS': True,
         'OPTIONS': {
